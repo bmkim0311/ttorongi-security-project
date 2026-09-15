@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}
+    문의 작성 | 또롱이 공공자전거
+{% endblock %}
+
+{% block content %}
+<section class="tt-inquiry-form-page">
+    <div class="tt-inquiry-form-heading">
+        <a href="{{ url_for('inquiries') }}">
+            ← 내 문의 목록
+        </a>
+
+        <h1>문의 작성</h1>
+
+        <p>
+            문의 내용을 확인한 후 담당 관리자가 답변합니다.
+        </p>
+    </div>
+
+    <form
+        action="{{ url_for('inquiry_create') }}"
+        method="post"
+        class="tt-inquiry-form"
+    >
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ inquiry_csrf_token() }}"
+        >
+
+        <label>
+            <span>문의 분류</span>
+
+            <select
+                name="category"
+                required
+            >
+                {% for value, label in category_labels.items() %}
+                    {% if value != "all" %}
+                        <option
+                            value="{{ value }}"
+                            {% if form_data.category == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            <span>제목</span>
+
+            <input
+                type="text"
+                name="title"
+                maxlength="200"
+                value="{{ form_data.title }}"
+                placeholder="문의 제목을 입력해 주세요."
+                required
+            >
+        </label>
+
+        <label>
+            <span>문의 내용</span>
+
+            <textarea
+                name="content"
+                maxlength="5000"
+                placeholder="문의 내용을 구체적으로 입력해 주세요."
+                required
+            >{{ form_data.content }}</textarea>
+        </label>
+
+        <div class="tt-inquiry-form-notice">
+            <strong>문의 작성 전 확인</strong>
+
+            <p>
+                계정 비밀번호, 결제 비밀번호 등 민감한 정보는
+                입력하지 마세요.
+            </p>
+        </div>
+
+        <div class="tt-inquiry-form-actions">
+            <a href="{{ url_for('inquiries') }}">
+                취소
+            </a>
+
+            <button type="submit">
+                문의 접수
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}
+대여 상세 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="rental-detail-page">
+    <div class="rental-detail-container">
+        <div class="rental-detail-heading">
+            <div>
+                <a
+                    href="{{ url_for('history') }}"
+                    class="rental-detail-back"
+                >
+                    ← 이용내역
+                </a>
+
+                <span class="eyebrow">
+                    RENTAL DETAIL
+                </span>
+
+                <h1>
+                    대여 상세
+                </h1>
+
+                <p>
+                    자전거 이용정보와 반납 상태를 확인하세요.
+                </p>
+            </div>
+
+            <span
+                class="
+                    rental-detail-state
+                    rental-detail-state-{{ rental['status'] }}
+                "
+            >
+                {% if rental["status"] == "renting" %}
+                    대여 중
+                {% else %}
+                    반납 완료
+                {% endif %}
+            </span>
+        </div>
+
+        <section class="rental-detail-summary">
+            <article class="rental-detail-bike-card">
+                <div class="rental-bike-icon">
+                    🚲
+                </div>
+
+                <div>
+                    <span>
+                        자전거 번호
+                    </span>
+
+                    <h2>
+                        {{ rental["bicycle_code"] }}
+                    </h2>
+
+                    <p>
+                        QR {{ rental["qr_code"] }}
+                    </p>
+                </div>
+
+                <div class="rental-bike-battery">
+                    <span>
+                        배터리
+                    </span>
+
+                    <strong>
+                        {{ rental["battery_level"] }}%
+                    </strong>
+                </div>
+            </article>
+
+            <article class="rental-detail-pass-card">
+                <span>
+                    사용 이용권
+                </span>
+
+                <strong>
+                    {{ rental["pass_name"] or "-" }}
+                </strong>
+
+                <p>
+                    {{ rental["product_code"] or "-" }}
+                </p>
+            </article>
+        </section>
+
+        <section class="rental-detail-grid">
+            <article>
+                <span>
+                    대여번호
+                </span>
+
+                <strong>
+                    #{{ rental["id"] }}
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    이용자
+                </span>
+
+                <strong>
+                    {{ rental["user_name"] or rental["username"] }}
+                </strong>
+
+                <small>
+                    {{ rental["username"] }}
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    출발 대여소
+                </span>
+
+                <strong>
+                    {{ rental["departure_station_name"] }}
+                </strong>
+
+                <small>
+                    {{ rental["departure_station_code"] }}
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    반납 대여소
+                </span>
+
+                <strong>
+                    {{ rental["return_station_name"] or "반납 대기" }}
+                </strong>
+
+                <small>
+                    {{ rental["return_station_code"] or "-" }}
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    대여 시각
+                </span>
+
+                <strong>
+                    {{ rental["rental_time"] }}
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    반납 시각
+                </span>
+
+                <strong>
+                    {{ rental["return_time"] or "-" }}
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    이용시간
+                </span>
+
+                <strong>
+                    {% if rental["status"] == "renting" %}
+                        이용 중
+                    {% else %}
+                        {{ rental["usage_minutes"] }}분
+                    {% endif %}
+                </strong>
+            </article>
+
+            <article>
+                <span>
+                    초과 이용요금
+                </span>
+
+                <strong>
+                    {{ "{:,}".format(rental["fee"] or 0) }}원
+                </strong>
+            </article>
+        </section>
+
+        {% if rental["status"] == "renting" %}
+            <section class="rental-detail-return">
+                <div>
+                    <span class="eyebrow">
+                        RETURN BICYCLE
+                    </span>
+
+                    <h2>
+                        자전거 반납
+                    </h2>
+
+                    <p>
+                        반납할 대여소를 선택해 주세요.
+                    </p>
+                </div>
+
+                <form
+                    method="post"
+                    action="{{ url_for('return_bicycle_by_id') }}"
+                >
+                    <input
+                        type="hidden"
+                        name="rental_id"
+                        value="{{ rental['id'] }}"
+                    >
+
+                    <label for="detailReturnStation">
+                        반납 대여소
+                    </label>
+
+                    <div>
+                        <select
+                            id="detailReturnStation"
+                            name="station_id"
+                            required
+                        >
+                            <option value="">
+                                반납 대여소 선택
+                            </option>
+
+                            {% for station in stations %}
+                                <option
+                                    value="{{ station['id'] }}"
+                                >
+                                    {{ station["station_code"] }}
+                                    ·
+                                    {{ station["station_name"] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <button
+                            type="submit"
+                            class="main-button"
+                        >
+                            자전거 반납
+                        </button>
+                    </div>
+                </form>
+            </section>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.rental-detail-page {
+    min-height: calc(100vh - 120px);
+    padding: 42px 24px 72px;
+    background:
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(113, 158, 129, 0.11),
+            transparent 31%
+        ),
+        #f4f7f5;
+}
+
+.rental-detail-container {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+}
+
+.rental-detail-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.rental-detail-back {
+    display: inline-flex;
+    margin-bottom: 18px;
+    color: #64756a;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rental-detail-heading h1 {
+    margin: 7px 0 8px;
+    color: #29372f;
+    font-size: 40px;
+    letter-spacing: -0.05em;
+}
+
+.rental-detail-heading p {
+    margin: 0;
+    color: #77837b;
+    font-size: 14px;
+}
+
+.rental-detail-state {
+    display: inline-flex;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.rental-detail-state-renting {
+    color: #865f1d;
+    background: #fff2d7;
+}
+
+.rental-detail-state-returned {
+    color: #406a50;
+    background: #eaf4ed;
+}
+
+.rental-detail-summary {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.7fr)
+        minmax(250px, 0.8fr);
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.rental-detail-bike-card,
+.rental-detail-pass-card,
+.rental-detail-grid article,
+.rental-detail-return {
+    border: 1px solid #dae4dd;
+    background: #ffffff;
+    box-shadow:
+        0 16px 42px
+        rgba(43, 72, 55, 0.07);
+}
+
+.rental-detail-bike-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+    border-radius: 22px;
+}
+
+.rental-bike-icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: #eaf3ed;
+    font-size: 30px;
+}
+
+.rental-detail-bike-card > div:nth-child(2) {
+    flex: 1;
+}
+
+.rental-detail-bike-card span,
+.rental-detail-pass-card span,
+.rental-detail-grid span {
+    display: block;
+    margin-bottom: 5px;
+    color: #849087;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.rental-detail-bike-card h2 {
+    margin: 0 0 4px;
+    color: #2f4036;
+    font-size: 27px;
+}
+
+.rental-detail-bike-card p,
+.rental-detail-pass-card p {
+    margin: 0;
+    color: #89938d;
+    font-size: 11px;
+}
+
+.rental-bike-battery {
+    text-align: right;
+}
+
+.rental-bike-battery strong {
+    color: #4c7058;
+    font-size: 23px;
+}
+
+.rental-detail-pass-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px;
+    border-radius: 22px;
+}
+
+.rental-detail-pass-card strong {
+    color: #34443a;
+    font-size: 22px;
+}
+
+.rental-detail-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.rental-detail-grid article {
+    min-height: 118px;
+    padding: 18px;
+    border-radius: 16px;
+}
+
+.rental-detail-grid strong,
+.rental-detail-grid small {
+    display: block;
+}
+
+.rental-detail-grid strong {
+    color: #34423a;
+    font-size: 13px;
+    line-height: 1.55;
+    word-break: break-all;
+}
+
+.rental-detail-grid small {
+    margin-top: 5px;
+    color: #89938d;
+    font-size: 10px;
+}
+
+.rental-detail-return {
+    display: grid;
+    grid-template-columns:
+        minmax(230px, 0.7fr)
+        minmax(0, 1.3fr);
+    align-items: end;
+    gap: 30px;
+    margin-top: 20px;
+    padding: 25px;
+    border-radius: 22px;
+}
+
+.rental-detail-return h2 {
+    margin: 6px 0;
+    color: #304037;
+    font-size: 23px;
+}
+
+.rental-detail-return p {
+    margin: 0;
+    color: #7d8881;
+    font-size: 12px;
+}
+
+.rental-detail-return label {
+    display: block;
+    margin-bottom: 8px;
+    color: #5f6f65;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rental-detail-return form > div {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        150px;
+    gap: 10px;
+}
+
+.rental-detail-return select {
+    width: 100%;
+    min-height: 49px;
+    padding: 0 14px;
+    border: 1px solid #d4ded7;
+    border-radius: 11px;
+    outline: none;
+    background: #ffffff;
+}
+
+@media (max-width: 850px) {
+    .rental-detail-summary,
+    .rental-detail-return {
+        grid-template-columns: 1fr;
+    }
+
+    .rental-detail-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .rental-detail-heading {
+        flex-direction: column;
+    }
+
+    .rental-detail-grid,
+    .rental-detail-return form > div {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

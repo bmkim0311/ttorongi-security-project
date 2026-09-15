@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}
+비회원 대여소 조회 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="service-page">
+    <div class="service-container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">
+                    PUBLIC STATION INFORMATION
+                </span>
+
+                <h1>
+                    대여소 · 자전거 조회
+                </h1>
+
+                <p>
+                    회원가입 없이 대여소와
+                    대여 가능한 자전거를 확인할 수 있습니다.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('login') }}"
+                class="main-button"
+            >
+                로그인 후 QR 대여
+            </a>
+        </div>
+
+        <section class="station-summary">
+            <article>
+                <span>
+                    운영 대여소
+                </span>
+
+                <strong>
+                    {{ stations | length }}
+                </strong>
+
+                <small>
+                    개소
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    대여 가능 자전거
+                </span>
+
+                <strong>
+                    {{ total_available }}
+                </strong>
+
+                <small>
+                    대
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    조회 유형
+                </span>
+
+                <strong class="summary-normal">
+                    비회원 조회
+                </strong>
+            </article>
+        </section>
+
+        <section class="station-list">
+            {% for station in stations %}
+                <article class="station-item">
+                    <div class="station-item-top">
+                        <div class="station-name-area">
+                            <div class="station-pin">
+                                ●
+                            </div>
+
+                            <div>
+                                <span class="station-code">
+                                    {{ station["station_code"] }}
+                                </span>
+
+                                <h2>
+                                    {{ station["station_name"] }}
+                                </h2>
+
+                                <p>
+                                    {{ station["address"] }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="
+                                station-count
+                                {% if station['available_bicycles'] == 0 %}
+                                    station-count-empty
+                                {% endif %}
+                            "
+                        >
+                            <strong>
+                                {{ station["available_bicycles"] }}
+                            </strong>
+
+                            <span>
+                                대
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="station-progress-info">
+                        <span>
+                            대여 가능
+                        </span>
+
+                        <span>
+                            {{ station["available_bicycles"] }}
+                            /
+                            {{ station["capacity"] }}
+                        </span>
+                    </div>
+
+                    <div class="station-progress">
+                        <div
+                            class="station-progress-value"
+                            style="
+                                width:
+                                {{
+                                    (
+                                        station["available_bicycles"]
+                                        / station["capacity"]
+                                        * 100
+                                    )
+                                    | round
+                                }}%;
+                            "
+                        ></div>
+                    </div>
+
+                    <div class="station-item-bottom">
+                        <span>
+                            {% if station["available_bicycles"] > 0 %}
+                                대여 가능
+                            {% else %}
+                                대여 가능한 자전거 없음
+                            {% endif %}
+                        </span>
+
+                        <a href="{{ url_for('login') }}">
+                            로그인 후 대여
+                            →
+                        </a>
+                    </div>
+                </article>
+            {% else %}
+                <div class="empty-state">
+                    운영 중인 대여소가 없습니다.
+                </div>
+            {% endfor %}
+        </section>
+
+        <div class="guest-bottom-actions">
+            <a href="{{ url_for('home') }}">
+                비회원 홈
+            </a>
+
+            <a href="{{ url_for('signup') }}">
+                회원가입
+            </a>
+
+            <a href="{{ url_for('login') }}">
+                로그인
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}
+    자전거 관리 | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            BICYCLE OPERATIONS
+        </span>
+
+        <h1>자전거 관리</h1>
+
+        <p>
+            자전거의 배치 위치, 운행 상태 및 배터리를 관리합니다.
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('bicycle_create') }}"
+        class="primary-button"
+    >
+        새 자전거 등록
+    </a>
+</section>
+
+<section class="compact-metric-grid bicycle-summary-grid">
+    <article class="compact-metric-card">
+        <span>전체 자전거</span>
+
+        <strong>
+            {{ summary.total_count or 0 }}
+            <small>대</small>
+        </strong>
+    </article>
+
+    <article class="compact-metric-card">
+        <span>대여 가능</span>
+
+        <strong>
+            {{ summary.available_count or 0 }}
+            <small>대</small>
+        </strong>
+    </article>
+
+    <article class="compact-metric-card">
+        <span>대여 중</span>
+
+        <strong>
+            {{ summary.renting_count or 0 }}
+            <small>대</small>
+        </strong>
+    </article>
+
+    <article class="compact-metric-card">
+        <span>정비·고장</span>
+
+        <strong>
+            {{
+                (summary.maintenance_count or 0)
+                +
+                (summary.broken_count or 0)
+            }}
+            <small>대</small>
+        </strong>
+    </article>
+
+    <article class="compact-metric-card">
+        <span>배터리 부족</span>
+
+        <strong>
+            {{ summary.low_battery_count or 0 }}
+            <small>대</small>
+        </strong>
+    </article>
+</section>
+
+<section class="panel">
+    <form
+        action="{{ url_for('bicycles') }}"
+        method="get"
+        class="filter-bar bicycle-filter-bar"
+    >
+        <div class="filter-search">
+            <label for="keyword">
+                자전거 검색
+            </label>
+
+            <input
+                id="keyword"
+                type="search"
+                name="keyword"
+                value="{{ keyword }}"
+                placeholder="자전거 코드, QR 코드, 대여소"
+            >
+        </div>
+
+        <div class="filter-field">
+            <label for="status">
+                상태
+            </label>
+
+            <select
+                id="status"
+                name="status"
+            >
+                <option
+                    value="all"
+                    {% if selected_status == "all" %}
+                        selected
+                    {% endif %}
+                >
+                    전체 상태
+                </option>
+
+                {% for value, label in bicycle_status_labels.items() %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_status == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="station_id">
+                배치 대여소
+            </label>
+
+            <select
+                id="station_id"
+                name="station_id"
+            >
+                <option value="">
+                    전체 대여소
+                </option>
+
+                {% for station in stations %}
+                    <option
+                        value="{{ station.id }}"
+                        {% if selected_station == station.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ station.station_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="battery">
+                배터리
+            </label>
+
+            <select
+                id="battery"
+                name="battery"
+            >
+                <option
+                    value="all"
+                    {% if selected_battery == "all" %}
+                        selected
+                    {% endif %}
+                >
+                    전체 배터리
+                </option>
+
+                <option
+                    value="critical"
+                    {% if selected_battery == "critical" %}
+                        selected
+                    {% endif %}
+                >
+                    위험 · 20% 미만
+                </option>
+
+                <option
+                    value="low"
+                    {% if selected_battery == "low" %}
+                        selected
+                    {% endif %}
+                >
+                    낮음 · 20~49%
+                </option>
+
+                <option
+                    value="normal"
+                    {% if selected_battery == "normal" %}
+                        selected
+                    {% endif %}
+                >
+                    보통 · 50~89%
+                </option>
+
+                <option
+                    value="full"
+                    {% if selected_battery == "full" %}
+                        selected
+                    {% endif %}
+                >
+                    충분 · 90% 이상
+                </option>
+            </select>
+        </div>
+
+        <button
+            type="submit"
+            class="primary-button filter-submit"
+        >
+            조회
+        </button>
+
+        <a
+            href="{{ url_for('bicycles') }}"
+            class="secondary-button"
+        >
+            초기화
+        </a>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                BICYCLE FLEET
+            </span>
+
+            <h2>자전거 목록</h2>
+        </div>
+
+        <span class="result-count">
+            총 {{ total_count }}대
+        </span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="management-table bicycle-table">
+            <thead>
+                <tr>
+                    <th>자전거</th>
+                    <th>배치 대여소</th>
+                    <th>상태</th>
+                    <th>배터리</th>
+                    <th>진행 정비</th>
+                    <th>현재 이용자</th>
+                    <th>최근 점검</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for bicycle in bicycles %}
+                    <tr>
+                        <td>
+                            <div class="bicycle-identity">
+                                <span class="bicycle-symbol">
+                                    B
+                                </span>
+
+                                <span>
+                                    <strong>
+                                        {{ bicycle.bicycle_code }}
+                                    </strong>
+
+                                    <small>
+                                        {{ bicycle.qr_code }}
+                                    </small>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if bicycle.station_name %}
+                                <strong>
+                                    {{ bicycle.station_name }}
+                                </strong>
+
+                                <small>
+                                    {{ bicycle.station_code }}
+                                </small>
+                            {% else %}
+                                <span class="muted-text">
+                                    미배치
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="bicycle-state bicycle-state-{{ bicycle.status }}">
+                                {{
+                                    bicycle_status_labels.get(
+                                        bicycle.status,
+                                        bicycle.status
+                                    )
+                                }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="battery-cell">
+                                <strong>
+                                    {{ bicycle.battery_level }}%
+                                </strong>
+
+                                <span>
+                                    <i
+                                        style="width: {{ bicycle.battery_level }}%;"
+                                        class="{%
+                                            if bicycle.battery_level < 20
+                                        %}battery-low{%
+                                            elif bicycle.battery_level < 50
+                                        %}battery-medium{%
+                                            else
+                                        %}battery-high{%
+                                            endif
+                                        %}"
+                                    ></i>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if bicycle.active_task_count %}
+                                <span class="task-count-alert">
+                                    {{ bicycle.active_task_count }}건
+                                </span>
+                            {% else %}
+                                <span class="muted-text">
+                                    없음
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if bicycle.current_user_name %}
+                                <span class="live-rental">
+                                    {{ bicycle.current_user_name }}
+                                </span>
+                            {% else %}
+                                <span class="muted-text">
+                                    이용 없음
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ bicycle.last_checked_at or "-" }}
+                        </td>
+
+                        <td class="table-action-cell">
+                            <a
+                                href="{{ url_for(
+                                    'bicycle_detail_admin',
+                                    bicycle_id=bicycle.id
+                                ) }}"
+                                class="table-detail-link"
+                            >
+                                상세
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td
+                            colspan="8"
+                            class="empty-cell"
+                        >
+                            조건에 맞는 자전거가 없습니다.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_pages > 1 %}
+        <nav class="pagination">
+            {% if page > 1 %}
+                <a
+                    href="{{ url_for(
+                        'bicycles',
+                        keyword=keyword,
+                        status=selected_status,
+                        station_id=selected_station or '',
+                        battery=selected_battery,
+                        page=page - 1
+                    ) }}"
+                >
+                    이전
+                </a>
+            {% else %}
+                <span class="disabled">
+                    이전
+                </span>
+            {% endif %}
+
+            <div class="pagination-pages">
+                {% for page_number in range(
+                    1,
+                    total_pages + 1
+                ) %}
+                    <a
+                        href="{{ url_for(
+                            'bicycles',
+                            keyword=keyword,
+                            status=selected_status,
+                            station_id=selected_station or '',
+                            battery=selected_battery,
+                            page=page_number
+                        ) }}"
+                        class="{{
+                            'active'
+                            if page_number == page
+                            else ''
+                        }}"
+                    >
+                        {{ page_number }}
+                    </a>
+                {% endfor %}
+            </div>
+
+            {% if page < total_pages %}
+                <a
+                    href="{{ url_for(
+                        'bicycles',
+                        keyword=keyword,
+                        status=selected_status,
+                        station_id=selected_station or '',
+                        battery=selected_battery,
+                        page=page + 1
+                    ) }}"
+                >
+                    다음
+                </a>
+            {% else %}
+                <span class="disabled">
+                    다음
+                </span>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

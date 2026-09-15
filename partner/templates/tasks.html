@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}
+    배정 작업 | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            ASSIGNED TASKS
+        </span>
+
+        <h1>배정 작업</h1>
+
+        <p>
+            배정된 정비, 점검 및 현장 운영 업무를 확인합니다.
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('export_maintenance_work_orders') }}"
+        class="button button-secondary"
+    >
+        작업 목록 CSV
+    </a>
+</section>
+
+<section class="panel filter-panel">
+    <form
+        action="{{ url_for('tasks') }}"
+        method="get"
+        class="filter-form"
+    >
+        <div class="filter-field filter-field-grow">
+            <label for="keyword">검색</label>
+
+            <input
+                type="search"
+                id="keyword"
+                name="keyword"
+                value="{{ keyword }}"
+                placeholder="작업번호, 작업명, 대여소, 자전거 검색"
+            >
+        </div>
+
+        <div class="filter-field">
+            <label for="status">처리 상태</label>
+
+            <select
+                id="status"
+                name="status"
+            >
+                <option value="">전체 상태</option>
+
+                {% for value, label in status_labels.items() %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_status == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="priority">우선순위</label>
+
+            <select
+                id="priority"
+                name="priority"
+            >
+                <option value="">전체 우선순위</option>
+
+                {% for value, label in priority_labels.items() %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_priority == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                조회
+            </button>
+
+            <a
+                href="{{ url_for('tasks') }}"
+                class="button button-secondary"
+            >
+                초기화
+            </a>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                TASK LIST
+            </span>
+
+            <h2>
+                작업 목록
+                <span class="title-count">
+                    {{ tasks|length }}
+                </span>
+            </h2>
+        </div>
+    </div>
+
+    {% if tasks %}
+        <div class="desktop-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>작업번호</th>
+                        <th>작업 내용</th>
+                        <th>대여소 / 자전거</th>
+                        <th>우선순위</th>
+                        <th>처리 상태</th>
+                        <th>배정일</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <td>
+                                <strong class="table-code">
+                                    {{ task.task_code }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                <div class="table-title-cell">
+                                    <span class="issue-type">
+                                        {{
+                                            issue_type_labels.get(
+                                                task.issue_type,
+                                                task.issue_type
+                                            )
+                                        }}
+                                    </span>
+
+                                    <strong>
+                                        {{ task.issue_title }}
+                                    </strong>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="table-location-cell">
+                                    <strong>
+                                        {{ task.station_name or "미지정" }}
+                                    </strong>
+
+                                    <span>
+                                        {{ task.bicycle_code or "대여소 작업" }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge badge-priority-{{ task.priority }}">
+                                    {{
+                                        priority_labels.get(
+                                            task.priority,
+                                            task.priority
+                                        )
+                                    }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="badge badge-status-{{ task.status }}">
+                                    {{
+                                        status_labels.get(
+                                            task.status,
+                                            task.status
+                                        )
+                                    }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{
+                                    task.assigned_at.strftime(
+                                        "%Y.%m.%d %H:%M"
+                                    )
+                                    if task.assigned_at
+                                    else "-"
+                                }}
+                            </td>
+
+                            <td class="table-action-cell">
+                                <a
+                                    href="{{ url_for('task_detail', task_id=task.id) }}"
+                                    class="table-detail-link"
+                                >
+                                    상세보기
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-card-list">
+            {% for task in tasks %}
+                <a
+                    href="{{ url_for('task_detail', task_id=task.id) }}"
+                    class="mobile-task-card"
+                >
+                    <div class="mobile-task-top">
+                        <span class="table-code">
+                            {{ task.task_code }}
+                        </span>
+
+                        <span class="badge badge-status-{{ task.status }}">
+                            {{
+                                status_labels.get(
+                                    task.status,
+                                    task.status
+                                )
+                            }}
+                        </span>
+                    </div>
+
+                    <h3>{{ task.issue_title }}</h3>
+
+                    <p>
+                        {{ task.station_name or "대여소 미지정" }}
+                        ·
+                        {{ task.bicycle_code or "대여소 작업" }}
+                    </p>
+
+                    <div class="mobile-task-bottom">
+                        <span class="badge badge-priority-{{ task.priority }}">
+                            {{
+                                priority_labels.get(
+                                    task.priority,
+                                    task.priority
+                                )
+                            }}
+                        </span>
+
+                        <span>
+                            {{
+                                task.assigned_at.strftime(
+                                    "%Y.%m.%d"
+                                )
+                                if task.assigned_at
+                                else "-"
+                            }}
+                        </span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">⌕</div>
+
+            <h3>조건에 맞는 작업이 없습니다.</h3>
+
+            <p>
+                검색어나 필터 조건을 변경해 다시 조회해 주세요.
+            </p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

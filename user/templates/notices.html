@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}
+    공지사항 | 또롱이 공공자전거
+{% endblock %}
+
+{% block content %}
+<section class="public-notice-page">
+    <header class="public-notice-heading">
+        <span>고객 안내</span>
+
+        <h1>공지사항</h1>
+
+        <p>
+            또롱이 공공자전거 서비스의 주요 운영 안내와
+            안전 정보를 확인해 주세요.
+        </p>
+    </header>
+
+    <div class="public-notice-toolbar">
+        <nav
+            class="public-notice-categories"
+            aria-label="공지 분류"
+        >
+            {% for value, label in category_labels.items() %}
+                <a
+                    href="{{ url_for(
+                        'notices',
+                        category=value,
+                        keyword=keyword
+                    ) }}"
+                    class="{%
+                        if selected_category == value
+                    %}active{%
+                        endif
+                    %}"
+                >
+                    {{ label }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        <form
+            action="{{ url_for('notices') }}"
+            method="get"
+            class="public-notice-search"
+        >
+            <input
+                type="hidden"
+                name="category"
+                value="{{ selected_category }}"
+            >
+
+            <label>
+                <span class="sr-only">
+                    공지사항 검색
+                </span>
+
+                <input
+                    type="search"
+                    name="keyword"
+                    value="{{ keyword }}"
+                    placeholder="공지 제목 또는 내용 검색"
+                >
+            </label>
+
+            <button type="submit">
+                검색
+            </button>
+        </form>
+    </div>
+
+    <div class="public-notice-status">
+        <span>
+            전체
+            <strong>{{ total_count }}</strong>건
+        </span>
+
+        {% if total_count %}
+            <span>
+                {{ first_item }}–{{ last_item }}번째 표시
+            </span>
+        {% endif %}
+    </div>
+
+    <section class="public-notice-board">
+        <div class="public-notice-board-head">
+            <span>분류</span>
+            <span>제목</span>
+            <span>등록일</span>
+            <span>조회</span>
+        </div>
+
+        {% for notice in notices %}
+            <article
+                class="public-notice-row {% if notice.is_important %}important{% endif %}"
+            >
+                <div class="public-notice-type">
+                    {% if notice.is_important %}
+                        <span class="public-notice-important">
+                            중요
+                        </span>
+                    {% else %}
+                        <span class="public-notice-category">
+                            {{
+                                category_labels.get(
+                                    notice.category,
+                                    "일반"
+                                )
+                            }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="public-notice-title">
+                    <a
+                        href="{{ url_for(
+                            'notice_detail',
+                            notice_id=notice.id
+                        ) }}"
+                    >
+                        {{ notice.title }}
+                    </a>
+
+                    <p>
+                        {{
+                            notice.content
+                            | replace("\n", " ")
+                            | truncate(
+                                85,
+                                True,
+                                "..."
+                            )
+                        }}
+                    </p>
+                </div>
+
+                <time>
+                    {{
+                        notice.published_at
+                        .strftime("%Y.%m.%d")
+                    }}
+                </time>
+
+                <span class="public-notice-views">
+                    {{ notice.view_count }}
+                </span>
+            </article>
+        {% else %}
+            <div class="public-notice-empty">
+                <strong>
+                    등록된 공지사항이 없습니다.
+                </strong>
+
+                <p>
+                    검색어나 분류를 다시 확인해 주세요.
+                </p>
+            </div>
+        {% endfor %}
+    </section>
+
+    {% if total_pages > 1 %}
+        <nav
+            class="public-notice-pagination"
+            aria-label="공지사항 페이지 이동"
+        >
+            {% if page > 1 %}
+                <a
+                    href="{{ url_for(
+                        'notices',
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page - 1
+                    ) }}"
+                >
+                    이전
+                </a>
+            {% else %}
+                <span class="disabled">
+                    이전
+                </span>
+            {% endif %}
+
+            {% for page_number in range(
+                page_start,
+                page_end + 1
+            ) %}
+                <a
+                    href="{{ url_for(
+                        'notices',
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page_number
+                    ) }}"
+                    class="{%
+                        if page_number == page
+                    %}active{%
+                        endif
+                    %}"
+                >
+                    {{ page_number }}
+                </a>
+            {% endfor %}
+
+            {% if page < total_pages %}
+                <a
+                    href="{{ url_for(
+                        'notices',
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page + 1
+                    ) }}"
+                >
+                    다음
+                </a>
+            {% else %}
+                <span class="disabled">
+                    다음
+                </span>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

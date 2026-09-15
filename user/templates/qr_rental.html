@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+
+{% block title %}
+    QR 자전거 대여 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="service-page qr-service-page">
+    <div class="service-container qr-container">
+        <div class="page-heading qr-page-heading">
+            <div>
+                <span class="eyebrow">
+                    QR RENTAL
+                </span>
+
+                <h1>
+                    QR 자전거 대여
+                </h1>
+
+                <p>
+                    자전거에 부착된 QR 코드를
+                    카메라로 스캔해 주세요.
+                </p>
+            </div>
+        </div>
+
+        {% if active_rental %}
+            <section class="current-rental-panel">
+                <div class="current-rental-bike">
+                    🚲
+                </div>
+
+                <span class="current-rental-status">
+                    현재 대여 중
+                </span>
+
+                <h2>
+                    {{ active_rental["bicycle_code"] }}
+                </h2>
+
+                <dl>
+                    <div>
+                        <dt>
+                            출발 대여소
+                        </dt>
+
+                        <dd>
+                            {{ active_rental["station_name"] }}
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt>
+                            대여 시작
+                        </dt>
+
+                        <dd>
+                            {{ active_rental["rental_time"] }}
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt>
+                            배터리
+                        </dt>
+
+                        <dd>
+                            {{ active_rental["battery_level"] }}%
+                        </dd>
+                    </div>
+                </dl>
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="main-button full-button"
+                >
+                    이용내역에서 반납하기
+                </a>
+            </section>
+        {% else %}
+            <section class="qr-rental-layout">
+                <article class="qr-camera-card">
+                    <div class="qr-camera-header">
+                        <span>
+                            CAMERA SCAN
+                        </span>
+
+                        <strong id="cameraStatus">
+                            카메라 준비
+                        </strong>
+                    </div>
+
+                    <div class="qr-camera-area">
+                        <video
+                            id="qrVideo"
+                            autoplay
+                            muted
+                            playsinline
+                        ></video>
+
+                        <div
+                            class="camera-placeholder"
+                            id="cameraPlaceholder"
+                        >
+                            <div class="camera-placeholder-icon">
+                                ▣
+                            </div>
+
+                            <strong>
+                                카메라로 QR 코드를 스캔하세요
+                            </strong>
+
+                            <p>
+                                브라우저 카메라 권한을 허용해야 합니다.
+                            </p>
+                        </div>
+
+                        <div class="qr-scan-frame">
+                            <span class="scan-corner scan-top-left"></span>
+                            <span class="scan-corner scan-top-right"></span>
+                            <span class="scan-corner scan-bottom-left"></span>
+                            <span class="scan-corner scan-bottom-right"></span>
+
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+
+                    <div class="qr-camera-actions">
+                        <button
+                            type="button"
+                            class="camera-start-button"
+                            id="cameraStartButton"
+                        >
+                            카메라 시작
+                        </button>
+
+                        <button
+                            type="button"
+                            class="camera-stop-button"
+                            id="cameraStopButton"
+                            disabled
+                        >
+                            카메라 종료
+                        </button>
+                    </div>
+
+                    <p class="camera-support-message">
+                        Chrome 또는 Edge 브라우저 사용을 권장합니다.
+                    </p>
+                </article>
+
+                <article class="qr-rental-card">
+                    <div class="qr-rental-card-heading">
+                        <span class="eyebrow">
+                            BICYCLE INFORMATION
+                        </span>
+
+                        <h2>
+                            자전거 확인
+                        </h2>
+
+                        <p>
+                            QR 인식 결과를 확인한 후
+                            대여 버튼을 눌러 주세요.
+                        </p>
+                    </div>
+
+                    <form
+                        method="post"
+                        id="rentalForm"
+                        class="qr-rental-form"
+                    >
+                        <label for="qrCodeInput">
+                            QR 코드 또는 자전거 번호
+                        </label>
+
+                        <div class="qr-input-row">
+                            <input
+                                id="qrCodeInput"
+                                name="qr_code"
+                                type="text"
+                                value="{{ preview_code }}"
+                                placeholder="예: TTORONGI-001"
+                                autocomplete="off"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                id="previewButton"
+                            >
+                                조회
+                            </button>
+                        </div>
+
+                        <div
+                            class="scan-result-card
+                            {% if bicycle_preview %}
+                                scan-result-show
+                            {% endif %}"
+                            id="scanResultCard"
+                        >
+                            <div class="scan-result-icon">
+                                🚲
+                            </div>
+
+                            <div class="scan-result-information">
+                                <span>
+                                    자전거 번호
+                                </span>
+
+                                <strong id="resultBicycleCode">
+                                    {% if bicycle_preview %}
+                                        {{
+                                            bicycle_preview[
+                                                "bicycle_code"
+                                            ]
+                                        }}
+                                    {% else %}
+                                        QR 스캔 대기
+                                    {% endif %}
+                                </strong>
+
+                                <dl>
+                                    <div>
+                                        <dt>
+                                            대여소
+                                        </dt>
+
+                                        <dd id="resultStation">
+                                            {% if bicycle_preview %}
+                                                {{
+                                                    bicycle_preview[
+                                                        "station_name"
+                                                    ]
+                                                }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>
+                                            배터리
+                                        </dt>
+
+                                        <dd id="resultBattery">
+                                            {% if bicycle_preview %}
+                                                {{
+                                                    bicycle_preview[
+                                                        "battery_level"
+                                                    ]
+                                                }}%
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </dd>
+                                    </div>
+
+                                    <div>
+                                        <dt>
+                                            상태
+                                        </dt>
+
+                                        <dd
+                                            id="resultStatus"
+                                            class="result-normal"
+                                        >
+                                            {% if bicycle_preview %}
+                                                {% if (
+                                                    bicycle_preview[
+                                                        "status"
+                                                    ]
+                                                    == "available"
+                                                ) %}
+                                                    대여 가능
+                                                {% else %}
+                                                    이용 불가
+                                                {% endif %}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <div class="rental-ticket">
+                            <span>
+                                이용권
+                            </span>
+
+                            <strong>
+                                1시간권
+                            </strong>
+
+                            <p>
+                                기본 60분 2,000원 ·
+                                초과 30분당 1,000원
+                            </p>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="main-button full-button rental-submit"
+                        >
+                            자전거 대여하기
+                        </button>
+                    </form>
+
+                    <div class="qr-test-information">
+                        <span>
+                            TEST QR
+                        </span>
+
+                        <code>
+                            TTORONGI-001
+                        </code>
+
+                        <code>
+                            BIKE-001
+                        </code>
+                    </div>
+                </article>
+            </section>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const video = document.getElementById("qrVideo");
+        const cameraStatus = document.getElementById("cameraStatus");
+        const cameraPlaceholder = document.getElementById(
+            "cameraPlaceholder"
+        );
+        const startButton = document.getElementById(
+            "cameraStartButton"
+        );
+        const stopButton = document.getElementById(
+            "cameraStopButton"
+        );
+        const qrCodeInput = document.getElementById("qrCodeInput");
+        const previewButton = document.getElementById("previewButton");
+        const scanResultCard = document.getElementById(
+            "scanResultCard"
+        );
+
+        let mediaStream = null;
+        let detector = null;
+        let scanning = false;
+
+        async function startCamera() {
+            if (!navigator.mediaDevices) {
+                cameraStatus.textContent = "카메라 미지원";
+                window.showClientNotice(
+                    "현재 브라우저에서는 카메라를 사용할 수 없습니다.",
+                    "warning"
+                );
+                return;
+            }
+
+            if (!("BarcodeDetector" in window)) {
+                cameraStatus.textContent = "QR 인식 미지원";
+                window.showClientNotice(
+                    "현재 브라우저는 QR 자동 인식을 지원하지 않습니다. 직접 입력을 사용해 주세요.",
+                    "warning"
+                );
+                return;
+            }
+
+            try {
+                detector = new BarcodeDetector({
+                    formats: ["qr_code"],
+                });
+
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: {
+                            ideal: "environment",
+                        },
+                    },
+                    audio: false,
+                });
+
+                video.srcObject = mediaStream;
+
+                cameraPlaceholder.classList.add(
+                    "camera-placeholder-hide"
+                );
+
+                cameraStatus.textContent = "QR 스캔 중";
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                scanning = true;
+
+                scanFrame();
+
+            } catch (error) {
+                cameraStatus.textContent = "카메라 실행 실패";
+
+                window.showClientNotice(
+                    "카메라 권한을 확인해 주세요.",
+                    "danger"
+                );
+            }
+        }
+
+        async function scanFrame() {
+            if (!scanning || !detector) {
+                return;
+            }
+
+            try {
+                const barcodes = await detector.detect(video);
+
+                if (barcodes.length > 0) {
+                    const value = barcodes[0].rawValue.trim();
+
+                    qrCodeInput.value = value;
+                    cameraStatus.textContent = "QR 인식 완료";
+
+                    stopCamera();
+
+                    window.location.href = (
+                        "/rental/qr?code="
+                        + encodeURIComponent(value)
+                    );
+
+                    return;
+                }
+            } catch (error) {
+                console.log(
+                    "QR 인식 대기 중",
+                    error
+                );
+            }
+
+            window.requestAnimationFrame(
+                scanFrame
+            );
+        }
+
+        function stopCamera() {
+            scanning = false;
+
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+            }
+
+            mediaStream = null;
+            video.srcObject = null;
+
+            cameraPlaceholder.classList.remove(
+                "camera-placeholder-hide"
+            );
+
+            startButton.disabled = false;
+            stopButton.disabled = true;
+
+            if (cameraStatus.textContent !== "QR 인식 완료") {
+                cameraStatus.textContent = "카메라 종료";
+            }
+        }
+
+        startButton.addEventListener(
+            "click",
+            startCamera
+        );
+
+        stopButton.addEventListener(
+            "click",
+            stopCamera
+        );
+
+        previewButton.addEventListener(
+            "click",
+            function () {
+                const value = qrCodeInput.value.trim();
+
+                if (!value) {
+                    window.showClientNotice(
+                        "QR 코드 또는 자전거 번호를 입력해 주세요.",
+                        "warning"
+                    );
+
+                    return;
+                }
+
+                window.location.href = (
+                    "/rental/qr?code="
+                    + encodeURIComponent(value)
+                );
+            }
+        );
+
+        window.addEventListener(
+            "beforeunload",
+            stopCamera
+        );
+    });
+</script>
+{% endblock %}

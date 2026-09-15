@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}
+    자전거 현황 | 또롱이 협력업체 포털
+
+<style>
+.bicycle-operation-menu {
+    position: relative;
+    min-width: 82px;
+}
+
+.bicycle-operation-menu > summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid #d7e0da;
+    border-radius: 9px;
+    color: #52675a;
+    background: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+    white-space: nowrap;
+}
+
+.bicycle-operation-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.bicycle-operation-panel {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 8px);
+    right: 0;
+    display: grid;
+    gap: 13px;
+    width: 270px;
+    padding: 16px;
+    border: 1px solid #d9e2dc;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow:
+        0 18px 44px
+        rgba(38, 66, 48, 0.16);
+}
+
+.bicycle-operation-panel form {
+    display: grid;
+    gap: 7px;
+}
+
+.bicycle-operation-panel form + form {
+    padding-top: 13px;
+    border-top: 1px solid #e3e9e5;
+}
+
+.bicycle-operation-panel label {
+    color: #617066;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.bicycle-operation-panel select {
+    width: 100%;
+    min-height: 39px;
+    padding: 0 10px;
+    border: 1px solid #d4ddd7;
+    border-radius: 9px;
+    background: #ffffff;
+    font-size: 11px;
+}
+
+.bicycle-operation-panel .button {
+    min-height: 38px;
+    font-size: 11px;
+}
+
+.bicycle-operation-mobile {
+    margin-top: 14px;
+}
+
+.bicycle-operation-mobile > summary {
+    width: 100%;
+}
+
+.bicycle-operation-mobile .bicycle-operation-panel {
+    position: static;
+    width: 100%;
+    margin-top: 9px;
+    box-shadow: none;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            BICYCLE ASSETS
+        </span>
+
+        <h1>자전거 현황</h1>
+
+        <p>
+            전체 자전거의 위치, 상태, 배터리 및 작업 현황을 확인합니다.
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('export_bicycle_relocation') }}"
+        class="button button-secondary"
+    >
+        재배치 자료 JSON
+    </a>
+</section>
+
+<section class="panel filter-panel">
+    <form
+        action="{{ url_for('bicycles') }}"
+        method="get"
+        class="filter-form"
+    >
+        <div class="filter-field filter-field-grow">
+            <label for="keyword">자전거 검색</label>
+
+            <input
+                type="search"
+                id="keyword"
+                name="keyword"
+                value="{{ keyword }}"
+                placeholder="자전거 코드, QR 코드, 대여소 검색"
+            >
+        </div>
+
+        <div class="filter-field">
+            <label for="status">자전거 상태</label>
+
+            <select
+                id="status"
+                name="status"
+            >
+                <option value="">전체 상태</option>
+
+                {% for value, label in bicycle_status_labels.items() %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_status == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                조회
+            </button>
+
+            <a
+                href="{{ url_for('bicycles') }}"
+                class="button button-secondary"
+            >
+                초기화
+            </a>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                BICYCLE LIST
+            </span>
+
+            <h2>
+                자전거 목록
+                <span class="title-count">
+                    {{ bicycles|length }}
+                </span>
+            </h2>
+        </div>
+    </div>
+
+    {% if bicycles %}
+        <div class="desktop-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>자전거</th>
+                        <th>현재 대여소</th>
+                        <th>상태</th>
+                        <th>배터리</th>
+                        <th>활성 작업</th>
+                        <th>마지막 점검</th>
+                        <th>운영 변경</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for bicycle in bicycles %}
+                        <tr>
+                            <td>
+                                <div class="bicycle-code-cell">
+                                    <strong>
+                                        {{ bicycle.bicycle_code }}
+                                    </strong>
+
+                                    <span>
+                                        {{ bicycle.qr_code }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="table-location-cell">
+                                    <strong>
+                                        {{ bicycle.station_name or "대여소 외부" }}
+                                    </strong>
+
+                                    <span>
+                                        {{ bicycle.station_code or "-" }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge badge-bike-{{ bicycle.status }}">
+                                    {{
+                                        bicycle_status_labels.get(
+                                            bicycle.status,
+                                            bicycle.status
+                                        )
+                                    }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="battery-cell">
+                                    <strong>
+                                        {{ bicycle.battery_level }}%
+                                    </strong>
+
+                                    <div class="battery-bar">
+                                        <div
+                                            class="battery-bar-value
+                                            {% if bicycle.battery_level < 30 %}
+                                                low
+                                            {% elif bicycle.battery_level < 60 %}
+                                                medium
+                                            {% endif %}"
+                                            style="width: {{ bicycle.battery_level }}%;"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if bicycle.active_task_count %}
+                                    <strong class="text-danger">
+                                        {{ bicycle.active_task_count }}건
+                                    </strong>
+                                {% else %}
+                                    <span class="text-muted">
+                                        없음
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{
+                                    bicycle.last_checked_at.strftime(
+                                        "%Y.%m.%d %H:%M"
+                                    )
+                                    if bicycle.last_checked_at
+                                    else "점검 이력 없음"
+                                }}
+                            </td>
+
+                            <td>
+                                <details class="bicycle-operation-menu">
+                                    <summary>
+                                        변경
+                                    </summary>
+
+                                    <div class="bicycle-operation-panel">
+                                        <form
+                                            method="post"
+                                            action="{{ url_for(
+                                                'partner_bicycle_status_change'
+                                            ) }}"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="_csrf_token"
+                                                value="{{ csrf_token() }}"
+                                            >
+
+                                            <input
+                                                type="hidden"
+                                                name="bicycle_id"
+                                                value="{{ bicycle.id }}"
+                                            >
+
+                                            <label>
+                                                운영 상태
+                                            </label>
+
+                                            <select
+                                                name="status"
+                                                required
+                                            >
+                                                {% for value, label in bicycle_status_labels.items() %}
+                                                    {% if value != "renting" %}
+                                                        <option
+                                                            value="{{ value }}"
+                                                            {% if bicycle.status == value %}
+                                                                selected
+                                                            {% endif %}
+                                                        >
+                                                            {{ label }}
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+
+                                            <button
+                                                type="submit"
+                                                class="button button-secondary"
+                                            >
+                                                상태 변경
+                                            </button>
+                                        </form>
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for(
+                                                'partner_bicycle_relocate'
+                                            ) }}"
+                                        >
+                                            <input
+                                                type="hidden"
+                                                name="_csrf_token"
+                                                value="{{ csrf_token() }}"
+                                            >
+
+                                            <input
+                                                type="hidden"
+                                                name="bicycle_id"
+                                                value="{{ bicycle.id }}"
+                                            >
+
+                                            <label>
+                                                배치 대여소
+                                            </label>
+
+                                            <select
+                                                name="station_id"
+                                                required
+                                            >
+                                                {% for station in stations %}
+                                                    <option
+                                                        value="{{ station.id }}"
+                                                        {% if bicycle.station_id == station.id %}
+                                                            selected
+                                                        {% endif %}
+                                                    >
+                                                        {{ station.station_code }}
+                                                        ·
+                                                        {{ station.station_name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+
+                                            <button
+                                                type="submit"
+                                                class="button button-secondary"
+                                            >
+                                                위치 변경
+                                            </button>
+                                        </form>
+                                    </div>
+                                </details>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-card-list">
+            {% for bicycle in bicycles %}
+                <article class="mobile-bicycle-card">
+                    <div class="mobile-task-top">
+                        <div class="bicycle-code-cell">
+                            <strong>
+                                {{ bicycle.bicycle_code }}
+                            </strong>
+
+                            <span>
+                                {{ bicycle.qr_code }}
+                            </span>
+                        </div>
+
+                        <span class="badge badge-bike-{{ bicycle.status }}">
+                            {{
+                                bicycle_status_labels.get(
+                                    bicycle.status,
+                                    bicycle.status
+                                )
+                            }}
+                        </span>
+                    </div>
+
+                    <p>
+                        {{ bicycle.station_name or "대여소 외부" }}
+                    </p>
+
+                    <div class="mobile-bicycle-info">
+                        <span>
+                            배터리 {{ bicycle.battery_level }}%
+                        </span>
+
+                        <span>
+                            활성 작업 {{ bicycle.active_task_count or 0 }}건
+                        </span>
+                    </div>
+
+                    <details class="bicycle-operation-menu bicycle-operation-mobile">
+                        <summary>
+                            운영정보 변경
+                        </summary>
+
+                        <div class="bicycle-operation-panel">
+                            <form
+                                method="post"
+                                action="{{ url_for(
+                                    'partner_bicycle_status_change'
+                                ) }}"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="bicycle_id"
+                                    value="{{ bicycle.id }}"
+                                >
+
+                                <label>운영 상태</label>
+
+                                <select
+                                    name="status"
+                                    required
+                                >
+                                    {% for value, label in bicycle_status_labels.items() %}
+                                        {% if value != "renting" %}
+                                            <option
+                                                value="{{ value }}"
+                                                {% if bicycle.status == value %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                {{ label }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+
+                                <button
+                                    type="submit"
+                                    class="button button-secondary"
+                                >
+                                    상태 변경
+                                </button>
+                            </form>
+
+                            <form
+                                method="post"
+                                action="{{ url_for(
+                                    'partner_bicycle_relocate'
+                                ) }}"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="bicycle_id"
+                                    value="{{ bicycle.id }}"
+                                >
+
+                                <label>배치 대여소</label>
+
+                                <select
+                                    name="station_id"
+                                    required
+                                >
+                                    {% for station in stations %}
+                                        <option
+                                            value="{{ station.id }}"
+                                            {% if bicycle.station_id == station.id %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            {{ station.station_code }}
+                                            ·
+                                            {{ station.station_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                                <button
+                                    type="submit"
+                                    class="button button-secondary"
+                                >
+                                    위치 변경
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">B</div>
+
+            <h3>조회된 자전거가 없습니다.</h3>
+
+            <p>
+                검색어나 상태 조건을 변경해 주세요.
+            </p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

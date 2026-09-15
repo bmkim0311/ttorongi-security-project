@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}
+    대시보드 | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            OPERATIONS OVERVIEW
+        </span>
+
+        <h1>
+            업무 대시보드
+        </h1>
+
+        <p>
+            배정된 현장 업무와 처리 현황을 한눈에 확인합니다.
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('tasks') }}"
+        class="button button-primary"
+    >
+        전체 작업 확인
+    </a>
+</section>
+
+<section class="metric-grid">
+    <article class="metric-card metric-card-primary">
+        <div class="metric-card-top">
+            <span class="metric-label">
+                전체 배정 작업
+            </span>
+
+            <span class="metric-symbol">01</span>
+        </div>
+
+        <strong class="metric-value">
+            {{ task_counts.total_count or 0 }}
+        </strong>
+
+        <span class="metric-unit">건</span>
+
+        <p>
+            현재 업체에 배정된 전체 작업입니다.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <div class="metric-card-top">
+            <span class="metric-label">
+                신규 배정
+            </span>
+
+            <span class="metric-symbol">02</span>
+        </div>
+
+        <strong class="metric-value">
+            {{ task_counts.assigned_count or 0 }}
+        </strong>
+
+        <span class="metric-unit">건</span>
+
+        <p>
+            아직 접수하지 않은 신규 작업입니다.
+        </p>
+    </article>
+
+    <article class="metric-card">
+        <div class="metric-card-top">
+            <span class="metric-label">
+                처리 중
+            </span>
+
+            <span class="metric-symbol">03</span>
+        </div>
+
+        <strong class="metric-value">
+            {{
+                (task_counts.accepted_count or 0)
+                +
+                (task_counts.in_progress_count or 0)
+            }}
+        </strong>
+
+        <span class="metric-unit">건</span>
+
+        <p>
+            접수 완료 또는 현장 작업 중인 업무입니다.
+        </p>
+    </article>
+
+    <article class="metric-card metric-card-danger">
+        <div class="metric-card-top">
+            <span class="metric-label">
+                긴급 업무
+            </span>
+
+            <span class="metric-symbol">!</span>
+        </div>
+
+        <strong class="metric-value">
+            {{ task_counts.urgent_count or 0 }}
+        </strong>
+
+        <span class="metric-unit">건</span>
+
+        <p>
+            우선 확인이 필요한 긴급 작업입니다.
+        </p>
+    </article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="panel panel-large">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    RECENT ASSIGNMENTS
+                </span>
+
+                <h2>최근 배정 업무</h2>
+            </div>
+
+            <a
+                href="{{ url_for('tasks') }}"
+                class="text-link"
+            >
+                전체 보기
+            </a>
+        </div>
+
+        {% if recent_tasks %}
+            <div class="task-list">
+                {% for task in recent_tasks %}
+                    <a
+                        href="{{ url_for('task_detail', task_id=task.id) }}"
+                        class="task-list-item"
+                    >
+                        <div class="task-priority-line priority-{{ task.priority }}"></div>
+
+                        <div class="task-list-main">
+                            <div class="task-list-meta">
+                                <span class="task-code">
+                                    {{ task.task_code }}
+                                </span>
+
+                                <span class="badge badge-status-{{ task.status }}">
+                                    {{ status_labels.get(task.status, task.status) }}
+                                </span>
+
+                                <span class="badge badge-priority-{{ task.priority }}">
+                                    {{ priority_labels.get(task.priority, task.priority) }}
+                                </span>
+                            </div>
+
+                            <h3>
+                                {{ task.issue_title }}
+                            </h3>
+
+                            <div class="task-location">
+                                <span>
+                                    {{ task.station_name or "대여소 미지정" }}
+                                </span>
+
+                                <span class="dot-divider">·</span>
+
+                                <span>
+                                    {{ task.bicycle_code or "대여소 작업" }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="task-list-time">
+                            <span>배정일</span>
+
+                            <strong>
+                                {{
+                                    task.assigned_at.strftime(
+                                        "%Y.%m.%d"
+                                    )
+                                    if task.assigned_at
+                                    else "-"
+                                }}
+                            </strong>
+                        </div>
+
+                        <span class="task-list-arrow">
+                            →
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">✓</div>
+
+                <h3>배정된 작업이 없습니다.</h3>
+
+                <p>
+                    새로운 업무가 배정되면 이 영역에 표시됩니다.
+                </p>
+            </div>
+        {% endif %}
+    </article>
+
+    <aside class="dashboard-side">
+        <article class="panel">
+            <div class="panel-header compact">
+                <div>
+                    <span class="panel-eyebrow">
+                        WORK PROGRESS
+                    </span>
+
+                    <h2>작업 처리 현황</h2>
+                </div>
+            </div>
+
+            {% set total = task_counts.total_count or 0 %}
+            {% set completed = task_counts.completed_count or 0 %}
+            {% set progress = (
+                (completed / total * 100)
+                if total > 0
+                else 0
+            ) %}
+
+            <div class="progress-summary">
+                <div class="progress-ring">
+                    <strong>
+                        {{ progress|round|int }}%
+                    </strong>
+
+                    <span>완료율</span>
+                </div>
+
+                <div class="progress-details">
+                    <div>
+                        <span>완료</span>
+                        <strong>{{ completed }}건</strong>
+                    </div>
+
+                    <div>
+                        <span>전체</span>
+                        <strong>{{ total }}건</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div
+                    class="progress-bar-value"
+                    style="width: {{ progress }}%;"
+                ></div>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-header compact">
+                <div>
+                    <span class="panel-eyebrow">
+                        ASSET STATUS
+                    </span>
+
+                    <h2>관리 자산 현황</h2>
+                </div>
+            </div>
+
+            <div class="asset-summary-list">
+                <a
+                    href="{{ url_for('stations') }}"
+                    class="asset-summary-item"
+                >
+                    <div class="asset-summary-icon">
+                        S
+                    </div>
+
+                    <div>
+                        <span>관련 대여소</span>
+                        <strong>
+                            {{ station_summary.station_count or 0 }}개소
+                        </strong>
+                    </div>
+
+                    <span class="asset-arrow">→</span>
+                </a>
+
+                <a
+                    href="{{ url_for('bicycles') }}"
+                    class="asset-summary-item"
+                >
+                    <div class="asset-summary-icon">
+                        B
+                    </div>
+
+                    <div>
+                        <span>관련 자전거</span>
+                        <strong>
+                            {{ bicycle_summary.bicycle_count or 0 }}대
+                        </strong>
+                    </div>
+
+                    <span class="asset-arrow">→</span>
+                </a>
+            </div>
+
+            <div class="asset-status-grid">
+                <div>
+                    <span>대여 가능</span>
+                    <strong>
+                        {{ bicycle_summary.available_count or 0 }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>정비 중</span>
+                    <strong>
+                        {{ bicycle_summary.maintenance_count or 0 }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>고장</span>
+                    <strong>
+                        {{ bicycle_summary.broken_count or 0 }}
+                    </strong>
+                </div>
+            </div>
+        </article>
+    </aside>
+</section>
+{% endblock %}

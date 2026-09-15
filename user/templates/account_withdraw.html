@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+회원 탈퇴 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="account-page">
+    <div class="account-form-container">
+        <div class="account-heading account-danger-heading">
+            <span>WITHDRAW ACCOUNT</span>
+            <h1>회원 탈퇴</h1>
+            <p>
+                탈퇴 후에는 현재 계정으로 로그인할 수 없습니다.
+            </p>
+        </div>
+
+        <div class="account-withdraw-warning">
+            <strong>
+                탈퇴 전 확인해 주세요.
+            </strong>
+
+            <p>
+                회원 정보는 비활성화·익명화되며,
+                대여 및 결제 기록은 서비스 운영과 법적 의무를 위해
+                필요한 범위에서 보관될 수 있습니다.
+            </p>
+        </div>
+
+        <form
+            action="{{ url_for('account_withdraw') }}"
+            method="post"
+            class="account-form"
+        >
+            <label for="current_password">
+                현재 비밀번호
+                <b>*</b>
+            </label>
+
+            <input
+                type="password"
+                id="current_password"
+                name="current_password"
+                autocomplete="current-password"
+                required
+            >
+
+            <label for="confirmation">
+                확인 문구
+                <b>*</b>
+            </label>
+
+            <input
+                type="text"
+                id="confirmation"
+                name="confirmation"
+                placeholder="회원탈퇴"
+                autocomplete="off"
+                required
+            >
+
+            <button
+                type="submit"
+                class="account-withdraw-button"
+            >
+                회원 탈퇴
+            </button>
+        </form>
+
+        <a
+            href="{{ url_for('account_profile') }}"
+            class="account-back-link"
+        >
+            취소하고 내 정보로 돌아가기
+        </a>
+    </div>
+</section>
+{% endblock %}

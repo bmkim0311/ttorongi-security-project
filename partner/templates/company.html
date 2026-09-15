@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}
+    업체 정보 | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            COMPANY PROFILE
+        </span>
+
+        <h1>업체 정보</h1>
+
+        <p>
+            등록된 협력업체 정보와 최근 로그인 기록을 확인합니다.
+        </p>
+    </div>
+</section>
+
+<section class="company-layout">
+    <article class="panel company-profile-card">
+        <div class="company-profile-header">
+            <div class="company-profile-mark">
+                {{ company.company_name[0] }}
+            </div>
+
+            <div>
+                <span class="company-code">
+                    {{ company.company_code }}
+                </span>
+
+                <h2>{{ company.company_name }}</h2>
+
+                <span class="badge badge-company-{{ company.company_status }}">
+                    {{
+                        {
+                            "active": "계약 활성",
+                            "inactive": "계약 종료",
+                            "suspended": "이용 정지"
+                        }.get(
+                            company.company_status,
+                            company.company_status
+                        )
+                    }}
+                </span>
+            </div>
+        </div>
+
+        <div class="company-info-grid">
+            <div class="company-info-item">
+                <span>담당자</span>
+                <strong>{{ company.manager_name }}</strong>
+            </div>
+
+            <div class="company-info-item">
+                <span>사업자번호</span>
+                <strong>{{ company.business_number or "-" }}</strong>
+            </div>
+
+            <div class="company-info-item">
+                <span>대표 연락처</span>
+                <strong>{{ company.company_phone or "-" }}</strong>
+            </div>
+
+            <div class="company-info-item">
+                <span>대표 이메일</span>
+                <strong>{{ company.company_email or "-" }}</strong>
+            </div>
+
+            <div class="company-info-item company-info-wide">
+                <span>주소</span>
+                <strong>{{ company.address or "-" }}</strong>
+            </div>
+
+            <div class="company-info-item">
+                <span>계약 시작일</span>
+
+                <strong>
+                    {{
+                        company.contract_start_date.strftime(
+                            "%Y.%m.%d"
+                        )
+                        if company.contract_start_date
+                        else "-"
+                    }}
+                </strong>
+            </div>
+
+            <div class="company-info-item">
+                <span>계약 종료일</span>
+
+                <strong>
+                    {{
+                        company.contract_end_date.strftime(
+                            "%Y.%m.%d"
+                        )
+                        if company.contract_end_date
+                        else "-"
+                    }}
+                </strong>
+            </div>
+        </div>
+
+        <div class="company-notice">
+            <strong>정보 변경 안내</strong>
+
+            <p>
+                업체명, 계약 정보 및 담당자 변경은
+                또롱이 통합운영센터의 승인 후 반영됩니다.
+            </p>
+        </div>
+    </article>
+
+    <aside class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    ACCESS HISTORY
+                </span>
+
+                <h2>최근 로그인 기록</h2>
+            </div>
+        </div>
+
+        {% if recent_login_logs %}
+            <div class="login-history-list">
+                {% for log in recent_login_logs %}
+                    <div class="login-history-item">
+                        <div class="login-result-icon result-{{ log.result }}">
+                            {% if log.result == "success" %}
+                                ✓
+                            {% else %}
+                                !
+                            {% endif %}
+                        </div>
+
+                        <div class="login-history-copy">
+                            <strong>
+                                {% if log.result == "success" %}
+                                    로그인 성공
+                                {% else %}
+                                    로그인 실패
+                                {% endif %}
+                            </strong>
+
+                            <span>
+                                {{ log.ip_address or "IP 정보 없음" }}
+                            </span>
+                        </div>
+
+                        <div class="login-history-time">
+                            {{
+                                log.created_at.strftime(
+                                    "%Y.%m.%d"
+                                )
+                                if log.created_at
+                                else "-"
+                            }}
+
+                            <span>
+                                {{
+                                    log.created_at.strftime(
+                                        "%H:%M"
+                                    )
+                                    if log.created_at
+                                    else ""
+                                }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state compact">
+                <h3>로그인 기록이 없습니다.</h3>
+            </div>
+        {% endif %}
+    </aside>
+</section>
+{% endblock %}

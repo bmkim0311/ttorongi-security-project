@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}
+    문의 수정 | 또롱이 공공자전거
+{% endblock %}
+
+{% block content %}
+<section class="tt-inquiry-form-page">
+    <div class="tt-inquiry-form-heading">
+        <a
+            href="{{ url_for(
+                'inquiry_detail',
+                inquiry_id=inquiry.id
+            ) }}"
+        >
+            ← 문의 상세
+        </a>
+
+        <h1>문의 수정</h1>
+
+        <p>
+            관리자가 확인하기 전인 접수 상태에서만 수정할 수 있습니다.
+        </p>
+    </div>
+
+    <form
+        action="{{ url_for(
+            'inquiry_edit',
+            inquiry_id=inquiry.id
+        ) }}"
+        method="post"
+        class="tt-inquiry-form"
+    >
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ inquiry_csrf_token() }}"
+        >
+
+        <label>
+            <span>문의 분류</span>
+
+            <select
+                name="category"
+                required
+            >
+                {% for value, label in category_labels.items() %}
+                    {% if value != "all" %}
+                        <option
+                            value="{{ value }}"
+                            {% if form_data.category == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            <span>제목</span>
+
+            <input
+                type="text"
+                name="title"
+                maxlength="200"
+                value="{{ form_data.title }}"
+                required
+            >
+        </label>
+
+        <label>
+            <span>문의 내용</span>
+
+            <textarea
+                name="content"
+                maxlength="5000"
+                required
+            >{{ form_data.content }}</textarea>
+        </label>
+
+        <div class="tt-inquiry-form-actions">
+            <a
+                href="{{ url_for(
+                    'inquiry_detail',
+                    inquiry_id=inquiry.id
+                ) }}"
+            >
+                취소
+            </a>
+
+            <button type="submit">
+                수정 저장
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

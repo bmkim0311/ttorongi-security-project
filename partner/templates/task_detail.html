@@ -1,0 +1,640 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ task.task_code }} | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <a
+            href="{{ url_for('tasks') }}"
+            class="back-link"
+        >
+            ← 배정 작업으로 돌아가기
+        </a>
+
+        <div class="detail-heading-row">
+            <div>
+                <span class="page-eyebrow">
+                    {{ task.task_code }}
+                </span>
+
+                <h1>{{ task.issue_title }}</h1>
+
+                <p>
+                    {{
+                        issue_type_labels.get(
+                            task.issue_type,
+                            task.issue_type
+                        )
+                    }}
+                    작업 상세 정보입니다.
+                </p>
+            </div>
+
+            <div class="detail-heading-badges">
+                <span class="badge badge-priority-{{ task.priority }}">
+                    {{
+                        priority_labels.get(
+                            task.priority,
+                            task.priority
+                        )
+                    }}
+                </span>
+
+                <span class="badge badge-status-{{ task.status }}">
+                    {{
+                        status_labels.get(
+                            task.status,
+                            task.status
+                        )
+                    }}
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="detail-layout">
+    <div class="detail-main-column">
+        <article class="panel">
+            <div class="panel-header">
+                <div>
+                    <span class="panel-eyebrow">
+                        TASK INFORMATION
+                    </span>
+
+                    <h2>작업 요청 정보</h2>
+                </div>
+            </div>
+
+            <div class="description-block">
+                <h3>고장 및 점검 내용</h3>
+
+                <p>
+                    {{ task.issue_description or "상세 내용이 없습니다." }}
+                </p>
+            </div>
+
+            <div class="description-block highlighted">
+                <h3>관리자 요청사항</h3>
+
+                <p>
+                    {{
+                        task.administrator_request
+                        or
+                        "별도의 관리자 요청사항이 없습니다."
+                    }}
+                </p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span>작업 유형</span>
+
+                    <strong>
+                        {{
+                            issue_type_labels.get(
+                                task.issue_type,
+                                task.issue_type
+                            )
+                        }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>우선순위</span>
+
+                    <strong>
+                        {{
+                            priority_labels.get(
+                                task.priority,
+                                task.priority
+                            )
+                        }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>배정 일시</span>
+
+                    <strong>
+                        {{
+                            task.assigned_at.strftime(
+                                "%Y.%m.%d %H:%M"
+                            )
+                            if task.assigned_at
+                            else "-"
+                        }}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>현재 상태</span>
+
+                    <strong>
+                        {{
+                            status_labels.get(
+                                task.status,
+                                task.status
+                            )
+                        }}
+                    </strong>
+                </div>
+            </div>
+        </article>
+
+        {% if task.status == "assigned" %}
+            <article class="panel action-panel">
+                <div class="action-panel-icon">
+                    01
+                </div>
+
+                <div class="action-panel-copy">
+                    <h2>작업을 접수하시겠습니까?</h2>
+
+                    <p>
+                        작업 내용을 확인한 후 접수하면 담당 업무로 확정됩니다.
+                    </p>
+                </div>
+
+                <form
+                    action="{{ url_for('accept_task', task_id=task.id) }}"
+                    method="post"
+                >
+                    <input
+                        type="hidden"
+                        name="_csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        작업 접수
+                    </button>
+                </form>
+            </article>
+        {% elif task.status == "accepted" %}
+            <article class="panel action-panel">
+                <div class="action-panel-icon">
+                    02
+                </div>
+
+                <div class="action-panel-copy">
+                    <h2>현장 작업을 시작하시겠습니까?</h2>
+
+                    <p>
+                        연결된 자전거가 있다면 작업 시작과 동시에
+                        정비 중 상태로 변경됩니다.
+                    </p>
+                </div>
+
+                <form
+                    action="{{ url_for('start_task', task_id=task.id) }}"
+                    method="post"
+                >
+                    <input
+                        type="hidden"
+                        name="_csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        작업 시작
+                    </button>
+                </form>
+            </article>
+        {% elif task.status == "in_progress" %}
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <span class="panel-eyebrow">
+                            COMPLETION REPORT
+                        </span>
+
+                        <h2>작업 완료 보고</h2>
+                    </div>
+                </div>
+
+                <form
+                    action="{{ url_for('complete_task', task_id=task.id) }}"
+                    method="post"
+                    class="report-form"
+                >
+                    <input
+                        type="hidden"
+                        name="_csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                    <div class="form-group">
+                        <label for="work_description">
+                            처리 내용
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <textarea
+                            id="work_description"
+                            name="work_description"
+                            rows="7"
+                            maxlength="5000"
+                            placeholder="점검 및 정비 과정, 확인 결과, 조치 내용을 구체적으로 입력하세요."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="replaced_parts">
+                            교체 부품
+                        </label>
+
+                        <input
+                            type="text"
+                            id="replaced_parts"
+                            name="replaced_parts"
+                            maxlength="500"
+                            placeholder="예: 브레이크 패드 1세트, 제동 케이블"
+                        >
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="additional_check">
+                                추가 점검 여부
+                            </label>
+
+                            <select
+                                id="additional_check"
+                                name="additional_check"
+                                onchange="toggleAdditionalCheck()"
+                            >
+                                <option value="none">
+                                    추가 점검 불필요
+                                </option>
+
+                                <option value="required">
+                                    추가 점검 필요
+                                </option>
+                            </select>
+                        </div>
+
+                        {% if task.bicycle_id %}
+                            <div class="form-group">
+                                <label for="bicycle_result_status">
+                                    작업 후 자전거 상태
+                                </label>
+
+                                <select
+                                    id="bicycle_result_status"
+                                    name="bicycle_result_status"
+                                >
+                                    <option value="available">
+                                        대여 가능
+                                    </option>
+
+                                    <option value="maintenance">
+                                        추가 정비 필요
+                                    </option>
+
+                                    <option value="broken">
+                                        운행 불가
+                                    </option>
+                                </select>
+                            </div>
+                        {% else %}
+                            <input
+                                type="hidden"
+                                name="bicycle_result_status"
+                                value="available"
+                            >
+                        {% endif %}
+                    </div>
+
+                    <div
+                        class="form-group"
+                        id="additional-check-detail-group"
+                        hidden
+                    >
+                        <label for="additional_check_detail">
+                            추가 점검 사유
+                            <span class="required-mark">*</span>
+                        </label>
+
+                        <textarea
+                            id="additional_check_detail"
+                            name="additional_check_detail"
+                            rows="4"
+                            maxlength="3000"
+                            placeholder="추가 점검이 필요한 원인과 요청사항을 입력하세요."
+                        ></textarea>
+                    </div>
+
+                    <div class="report-submit-area">
+                        <div class="report-submit-note">
+                            <strong>제출 전 확인</strong>
+
+                            <p>
+                                완료 보고 후 작업 상태가 처리 완료로 변경되며,
+                                입력한 결과가 운영 이력에 저장됩니다.
+                            </p>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="button button-success button-large"
+                        >
+                            완료 보고서 제출
+                        </button>
+                    </div>
+                </form>
+            </article>
+        {% elif task.status == "completed" %}
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <span class="panel-eyebrow">
+                            COMPLETED REPORT
+                        </span>
+
+                        <h2>제출된 작업 보고서</h2>
+                    </div>
+
+                    <span class="badge badge-status-{{ task.report_status }}">
+                        {{
+                            {
+                                "submitted": "검토 대기",
+                                "reviewed": "검토 완료",
+                                "rejected": "보완 요청"
+                            }.get(
+                                task.report_status,
+                                task.report_status or "보고서 없음"
+                            )
+                        }}
+                    </span>
+                </div>
+
+                {% if task.report_id %}
+                    <div class="report-view">
+                        <div class="description-block">
+                            <h3>처리 내용</h3>
+
+                            <p>{{ task.work_description }}</p>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span>교체 부품</span>
+
+                                <strong>
+                                    {{ task.replaced_parts or "없음" }}
+                                </strong>
+                            </div>
+
+                            <div class="info-item">
+                                <span>추가 점검</span>
+
+                                <strong>
+                                    {{
+                                        "필요"
+                                        if task.additional_check == "required"
+                                        else "불필요"
+                                    }}
+                                </strong>
+                            </div>
+
+                            <div class="info-item">
+                                <span>최종 자전거 상태</span>
+
+                                <strong>
+                                    {{
+                                        bicycle_status_labels.get(
+                                            task.bicycle_result_status,
+                                            task.bicycle_result_status
+                                        )
+                                    }}
+                                </strong>
+                            </div>
+
+                            <div class="info-item">
+                                <span>보고 일시</span>
+
+                                <strong>
+                                    {{
+                                        task.report_created_at.strftime(
+                                            "%Y.%m.%d %H:%M"
+                                        )
+                                        if task.report_created_at
+                                        else "-"
+                                    }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        {% if task.additional_check_detail %}
+                            <div class="description-block warning">
+                                <h3>추가 점검 요청사항</h3>
+
+                                <p>
+                                    {{ task.additional_check_detail }}
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="empty-state compact">
+                        <h3>등록된 보고서가 없습니다.</h3>
+                    </div>
+                {% endif %}
+            </article>
+        {% endif %}
+    </div>
+
+    <aside class="detail-side-column">
+        <article class="panel sticky-panel">
+            <div class="panel-header compact">
+                <div>
+                    <span class="panel-eyebrow">
+                        LOCATION
+                    </span>
+
+                    <h2>작업 대상</h2>
+                </div>
+            </div>
+
+            <div class="asset-detail-section">
+                <span class="asset-detail-label">
+                    대여소
+                </span>
+
+                <strong class="asset-detail-title">
+                    {{ task.station_name or "미지정" }}
+                </strong>
+
+                <p>
+                    {{ task.station_address or "주소 정보 없음" }}
+                </p>
+
+                {% if task.station_code %}
+                    <span class="asset-code">
+                        {{ task.station_code }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="asset-detail-divider"></div>
+
+            <div class="asset-detail-section">
+                <span class="asset-detail-label">
+                    자전거
+                </span>
+
+                {% if task.bicycle_id %}
+                    <strong class="asset-detail-title">
+                        {{ task.bicycle_code }}
+                    </strong>
+
+                    <p>
+                        QR 코드 {{ task.qr_code }}
+                    </p>
+
+                    <div class="inline-status-row">
+                        <span class="badge badge-bike-{{ task.bicycle_status }}">
+                            {{
+                                bicycle_status_labels.get(
+                                    task.bicycle_status,
+                                    task.bicycle_status
+                                )
+                            }}
+                        </span>
+
+                        <span>
+                            배터리 {{ task.battery_level }}%
+                        </span>
+                    </div>
+                {% else %}
+                    <strong class="asset-detail-title">
+                        대여소 설비 작업
+                    </strong>
+
+                    <p>
+                        특정 자전거가 지정되지 않은 작업입니다.
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="asset-detail-divider"></div>
+
+            <div class="timeline">
+                <div class="timeline-item active">
+                    <span class="timeline-dot"></span>
+
+                    <div>
+                        <strong>업무 배정</strong>
+
+                        <span>
+                            {{
+                                task.assigned_at.strftime(
+                                    "%Y.%m.%d %H:%M"
+                                )
+                                if task.assigned_at
+                                else "-"
+                            }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="timeline-item {% if task.accepted_at %}active{% endif %}">
+                    <span class="timeline-dot"></span>
+
+                    <div>
+                        <strong>작업 접수</strong>
+
+                        <span>
+                            {{
+                                task.accepted_at.strftime(
+                                    "%Y.%m.%d %H:%M"
+                                )
+                                if task.accepted_at
+                                else "대기 중"
+                            }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="timeline-item {% if task.started_at %}active{% endif %}">
+                    <span class="timeline-dot"></span>
+
+                    <div>
+                        <strong>작업 시작</strong>
+
+                        <span>
+                            {{
+                                task.started_at.strftime(
+                                    "%Y.%m.%d %H:%M"
+                                )
+                                if task.started_at
+                                else "대기 중"
+                            }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="timeline-item {% if task.completed_at %}active{% endif %}">
+                    <span class="timeline-dot"></span>
+
+                    <div>
+                        <strong>처리 완료</strong>
+
+                        <span>
+                            {{
+                                task.completed_at.strftime(
+                                    "%Y.%m.%d %H:%M"
+                                )
+                                if task.completed_at
+                                else "대기 중"
+                            }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </aside>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleAdditionalCheck() {
+        const select =
+            document.getElementById("additional_check");
+
+        const group =
+            document.getElementById(
+                "additional-check-detail-group"
+            );
+
+        const detail =
+            document.getElementById(
+                "additional_check_detail"
+            );
+
+        if (!select || !group || !detail) {
+            return;
+        }
+
+        const required =
+            select.value === "required";
+
+        group.hidden = !required;
+        detail.required = required;
+    }
+
+    toggleAdditionalCheck();
+</script>
+{% endblock %}

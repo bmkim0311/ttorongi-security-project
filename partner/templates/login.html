@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}
+    협력업체 로그인 | 또롱이
+{% endblock %}
+
+{% block guest_content %}
+<div class="login-page">
+    <section class="login-intro-panel">
+        <div class="login-intro-overlay"></div>
+
+        <div class="login-intro-content">
+            <div class="login-brand">
+                <div class="login-brand-mark">
+                    T
+                </div>
+
+                <div>
+                    <strong>TTORONGI</strong>
+                    <span>PARTNER OPERATIONS</span>
+                </div>
+            </div>
+
+            <div class="login-intro-main">
+                <p class="login-kicker">
+                    또롱이 공공자전거 통합운영기관
+                </p>
+
+                <h1>
+                    현장 업무를<br>
+                    한곳에서 관리합니다.
+                </h1>
+
+                <p class="login-description">
+                    관리자가 배정한 정비 및 점검 작업을 확인하고,
+                    작업 접수부터 완료 보고까지 체계적으로 처리하는
+                    협력업체 전용 운영 포털입니다.
+                </p>
+
+                <div class="login-feature-grid">
+                    <div class="login-feature">
+                        <span class="login-feature-number">01</span>
+
+                        <div>
+                            <strong>배정 업무 확인</strong>
+                            <p>
+                                긴급도와 처리 상태를 기준으로
+                                현장 업무를 확인합니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="login-feature">
+                        <span class="login-feature-number">02</span>
+
+                        <div>
+                            <strong>정비 상태 관리</strong>
+                            <p>
+                                작업 시작과 동시에 자전거 상태가
+                                정비 중으로 반영됩니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="login-feature">
+                        <span class="login-feature-number">03</span>
+
+                        <div>
+                            <strong>결과 보고</strong>
+                            <p>
+                                처리 내용과 교체 부품, 추가 점검 여부를
+                                업무 이력으로 남깁니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="login-intro-footer">
+                <span>Secure Partner Access</span>
+                <span>Operations Network</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="login-form-panel">
+        <div class="login-form-wrapper">
+            <div class="login-form-header">
+                <span class="login-form-badge">
+                    PARTNER PORTAL
+                </span>
+
+                <h2>협력업체 로그인</h2>
+
+                <p>
+                    등록된 협력업체 계정으로 로그인해 주세요.
+                </p>
+            </div>
+
+            <form
+                action="{{ url_for('login', next=request.args.get('next', '')) }}"
+                method="post"
+                class="login-form"
+            >
+                <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <div class="form-group">
+                    <label for="username">
+                        협력업체 아이디
+                    </label>
+
+                    <div class="input-with-icon">
+                        <span class="field-icon">ID</span>
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            value="{{ entered_username }}"
+                            placeholder="협력업체 아이디를 입력하세요"
+                            autocomplete="username"
+                            maxlength="50"
+                            required
+                            autofocus
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        비밀번호
+                    </label>
+
+                    <div class="input-with-icon">
+                        <span class="field-icon">PW</span>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="비밀번호를 입력하세요"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            onclick="togglePassword()"
+                            aria-label="비밀번호 표시 전환"
+                        >
+                            보기
+                        </button>
+                    </div>
+                </div>
+
+                <div class="login-security-note">
+                    <strong>보안 안내</strong>
+
+                    <p>
+                        본 포털은 승인된 협력업체 관계자만 사용할 수 있습니다.
+                        계정을 공동으로 사용하지 마세요.
+                    </p>
+                </div>
+
+                <button
+                    type="submit"
+                    class="primary-login-button"
+                >
+                    업무 포털 로그인
+                </button>
+            </form>
+
+            <div class="login-help">
+                <span>로그인 또는 계약 상태 문의</span>
+                <strong>또롱이 통합운영센터</strong>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function togglePassword() {
+        const passwordInput =
+            document.getElementById("password");
+
+        const toggleButton =
+            document.querySelector(".password-toggle");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleButton.textContent = "숨김";
+        } else {
+            passwordInput.type = "password";
+            toggleButton.textContent = "보기";
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}
+    대여소 현황 | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            STATION OPERATIONS
+        </span>
+
+        <h1>대여소 현황</h1>
+
+        <p>
+            대여소별 자전거 운영 상태와 활성 작업을 확인합니다.
+        </p>
+    </div>
+</section>
+
+<section class="panel filter-panel">
+    <form
+        action="{{ url_for('stations') }}"
+        method="get"
+        class="filter-form"
+    >
+        <div class="filter-field filter-field-grow">
+            <label for="keyword">대여소 검색</label>
+
+            <input
+                type="search"
+                id="keyword"
+                name="keyword"
+                value="{{ keyword }}"
+                placeholder="대여소 코드, 대여소명, 주소 검색"
+            >
+        </div>
+
+        <div class="filter-actions">
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                조회
+            </button>
+
+            <a
+                href="{{ url_for('stations') }}"
+                class="button button-secondary"
+            >
+                초기화
+            </a>
+        </div>
+    </form>
+</section>
+
+{% if stations %}
+    <section class="station-grid">
+        {% for station in stations %}
+            <article class="station-card">
+                <div class="station-card-header">
+                    <div>
+                        <span class="station-code">
+                            {{ station.station_code }}
+                        </span>
+
+                        <h2>{{ station.station_name }}</h2>
+                    </div>
+
+                    <span class="badge badge-station-{{ station.status }}">
+                        {{
+                            station_status_labels.get(
+                                station.status,
+                                station.status
+                            )
+                        }}
+                    </span>
+                </div>
+
+                <p class="station-address">
+                    {{ station.address }}
+                </p>
+
+                <div class="station-capacity">
+                    <div class="station-capacity-label">
+                        <span>자전거 보유</span>
+
+                        <strong>
+                            {{ station.bicycle_count or 0 }}
+                            /
+                            {{ station.capacity }}
+                        </strong>
+                    </div>
+
+                    {% set occupancy = (
+                        (station.bicycle_count / station.capacity * 100)
+                        if station.capacity
+                        else 0
+                    ) %}
+
+                    <div class="capacity-bar">
+                        <div
+                            class="capacity-bar-value"
+                            style="width: {{ [occupancy, 100]|min }}%;"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="station-stat-grid">
+                    <div>
+                        <span>대여 가능</span>
+
+                        <strong>
+                            {{ station.available_count or 0 }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>정비 중</span>
+
+                        <strong>
+                            {{ station.maintenance_count or 0 }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>고장</span>
+
+                        <strong>
+                            {{ station.broken_count or 0 }}
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="station-card-footer">
+                    <span>
+                        활성 작업
+                    </span>
+
+                    <strong class="{% if station.active_task_count %}text-danger{% endif %}">
+                        {{ station.active_task_count or 0 }}건
+                    </strong>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="panel">
+        <div class="empty-state">
+            <div class="empty-state-icon">⌂</div>
+
+            <h3>조회된 대여소가 없습니다.</h3>
+
+            <p>
+                검색 조건을 변경한 뒤 다시 조회해 주세요.
+            </p>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}

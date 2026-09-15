@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ error_code }} | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <div class="error-code">
+        {{ error_code }}
+    </div>
+
+    <span class="page-eyebrow">
+        SERVICE MESSAGE
+    </span>
+
+    <h1>{{ error_title }}</h1>
+
+    <p>{{ error_message }}</p>
+
+    <div class="error-actions">
+        <button
+            type="button"
+            class="button button-secondary"
+            onclick="history.back()"
+        >
+            이전 페이지
+        </button>
+
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="button button-primary"
+        >
+            대시보드로 이동
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block guest_content %}
+<section class="error-page guest-error-page">
+    <div class="error-code">
+        {{ error_code }}
+    </div>
+
+    <span class="page-eyebrow">
+        SERVICE MESSAGE
+    </span>
+
+    <h1>{{ error_title }}</h1>
+
+    <p>{{ error_message }}</p>
+
+    <a
+        href="{{ url_for('login') }}"
+        class="button button-primary"
+    >
+        로그인 화면으로 이동
+    </a>
+</section>
+{% endblock %}

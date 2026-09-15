@@ -1,0 +1,3530 @@
+/* =========================================================
+   TTORONGI AUTH UI
+   로그인 / 회원가입 / 아이디 찾기 / 비밀번호 찾기 통합 디자인
+   ========================================================= */
+
+:root {
+    --auth-page-bg: #f3f7f4;
+    --auth-card-bg: #ffffff;
+
+    --auth-green-900: #2f4a38;
+    --auth-green-800: #3f5d49;
+    --auth-green-700: #587662;
+    --auth-green-600: #708d78;
+    --auth-green-500: #89a38e;
+    --auth-green-200: #dce8df;
+    --auth-green-100: #edf4ef;
+
+    --auth-text: #2f4035;
+    --auth-muted: #78847c;
+    --auth-line: #dce5df;
+
+    --auth-radius: 28px;
+    --auth-input-radius: 12px;
+
+    --auth-shadow:
+        0 24px 65px rgba(45, 70, 52, 0.13),
+        0 5px 18px rgba(45, 70, 52, 0.05);
+}
+
+/* =========================================================
+   공통 페이지 배경
+   ========================================================= */
+
+.login-page,
+.signup-page,
+.password-reset-page {
+    width: 100% !important;
+    min-height: calc(100svh - 88px) !important;
+    height: auto !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 24px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+    overflow: visible !important;
+
+    background:
+        radial-gradient(
+            circle at 8% 8%,
+            rgba(117, 151, 126, 0.12),
+            transparent 31%
+        ),
+        radial-gradient(
+            circle at 94% 92%,
+            rgba(189, 210, 194, 0.22),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            #f2f6f3 0%,
+            #fafcfb 52%,
+            #f2f6f3 100%
+        ) !important;
+}
+
+/* =========================================================
+   공통 바깥 카드
+   ========================================================= */
+
+.login-container,
+.signup-layout,
+.password-reset-layout {
+    width: min(1060px, 100%) !important;
+    min-height: 560px !important;
+    height: auto !important;
+    max-height: none !important;
+
+    margin: 0 auto !important;
+
+    display: grid !important;
+    grid-template-columns:
+        minmax(360px, 0.88fr)
+        minmax(520px, 1.12fr) !important;
+
+    overflow: hidden !important;
+
+    border: 1px solid rgba(70, 98, 78, 0.11) !important;
+    border-radius: var(--auth-radius) !important;
+
+    background: var(--auth-card-bg) !important;
+    box-shadow: var(--auth-shadow) !important;
+
+    box-sizing: border-box !important;
+}
+
+/* =========================================================
+   공통 왼쪽 소개 패널
+   ========================================================= */
+
+.login-visual,
+.signup-intro,
+.password-reset-intro {
+    min-height: 560px !important;
+    height: auto !important;
+
+    padding: 46px 44px !important;
+
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+
+    color: #ffffff !important;
+
+    background:
+        radial-gradient(
+            circle at 87% 12%,
+            rgba(231, 255, 225, 0.17),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 7% 93%,
+            rgba(255, 244, 192, 0.09),
+            transparent 29%
+        ),
+        linear-gradient(
+            145deg,
+            #496a53 0%,
+            #64816b 50%,
+            #8ea593 100%
+        ) !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 기존 로그인 격자·도시 장식은 약하게 */
+.visual-pattern {
+    opacity: 0.16 !important;
+}
+
+.city-line {
+    opacity: 0.12 !important;
+}
+
+/* 왼쪽 공통 장식 */
+.login-visual::after,
+.signup-intro::after,
+.password-reset-intro::after {
+    content: "🚲";
+
+    position: absolute;
+    right: 30px;
+    bottom: 24px;
+    z-index: -1;
+
+    font-size: 76px;
+    line-height: 1;
+
+    opacity: 0.13;
+    transform: rotate(-7deg);
+}
+
+.login-visual::before,
+.signup-intro::before,
+.password-reset-intro::before {
+    content: "";
+
+    width: 230px;
+    height: 230px;
+
+    position: absolute;
+    top: -120px;
+    right: -85px;
+    z-index: -1;
+
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+/* =========================================================
+   왼쪽 타이포그래피 공통
+   ========================================================= */
+
+.service-label,
+.signup-eyebrow,
+.password-reset-eyebrow {
+    margin: 0 0 18px !important;
+
+    color: rgba(255, 255, 255, 0.78) !important;
+
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.21em !important;
+}
+
+.large-bike,
+.password-reset-icon {
+    margin: 0 0 18px !important;
+
+    font-size: 43px !important;
+    line-height: 1 !important;
+}
+
+.visual-content h1,
+.signup-intro h1,
+.password-reset-intro h1 {
+    max-width: 450px !important;
+
+    margin: 0 0 16px !important;
+
+    color: #ffffff !important;
+
+    font-size: clamp(37px, 3.7vw, 50px) !important;
+    font-weight: 850 !important;
+    line-height: 1.09 !important;
+    letter-spacing: -0.055em !important;
+
+    text-shadow:
+        0 4px 20px
+        rgba(31, 51, 37, 0.14) !important;
+}
+
+.visual-content > p,
+.signup-intro > p,
+.password-reset-intro > p {
+    max-width: 430px !important;
+
+    margin: 0 !important;
+
+    color: rgba(255, 255, 255, 0.82) !important;
+
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+}
+
+/* =========================================================
+   왼쪽 기능 카드 공통
+   ========================================================= */
+
+.service-features,
+.signup-benefits,
+.password-reset-steps {
+    max-width: 430px !important;
+
+    margin-top: 27px !important;
+
+    display: grid !important;
+    gap: 9px !important;
+}
+
+.service-features article,
+.signup-benefits div,
+.password-reset-steps > div {
+    min-height: 47px !important;
+
+    padding: 9px 13px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 11px !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 13px !important;
+
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.075) !important;
+
+    backdrop-filter: blur(8px);
+
+    box-sizing: border-box !important;
+}
+
+.service-features article > span,
+.signup-benefits span,
+.password-reset-steps > div span {
+    color: rgba(226, 255, 216, 0.72) !important;
+
+    font-size: 9px !important;
+    font-weight: 850 !important;
+}
+
+.service-features strong,
+.signup-benefits strong,
+.password-reset-steps strong {
+    color: #ffffff !important;
+    font-size: 12px !important;
+}
+
+.service-features article p {
+    margin: 2px 0 0 !important;
+
+    color: rgba(255, 255, 255, 0.68) !important;
+
+    font-size: 9px !important;
+    line-height: 1.35 !important;
+}
+
+/* =========================================================
+   공통 오른쪽 폼 패널
+   ========================================================= */
+
+.login-panel,
+.signup-card,
+.password-reset-card {
+    min-height: 560px !important;
+    height: auto !important;
+
+    padding: 38px 42px 32px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+
+    overflow: visible !important;
+
+    background:
+        linear-gradient(
+            150deg,
+            #ffffff 0%,
+            #fdfefd 100%
+        ) !important;
+
+    box-sizing: border-box !important;
+}
+
+/* =========================================================
+   공통 오른쪽 제목
+   ========================================================= */
+
+.login-heading .eyebrow,
+.signup-card-heading span,
+.password-reset-heading span {
+    color: #809688 !important;
+
+    font-size: 9px !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.21em !important;
+}
+
+.login-heading h2,
+.signup-card-heading h2,
+.password-reset-heading h2 {
+    margin: 7px 0 5px !important;
+
+    color: var(--auth-text) !important;
+
+    font-size: 29px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.045em !important;
+}
+
+.login-heading p,
+.signup-card-heading p,
+.password-reset-heading p {
+    margin: 0 0 18px !important;
+
+    color: var(--auth-muted) !important;
+
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+}
+
+/* =========================================================
+   공통 라벨·입력칸
+   ========================================================= */
+
+.login-form > label,
+.signup-form > label,
+.password-reset-form > label {
+    margin: 5px 0 5px !important;
+
+    color: #405347 !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+}
+
+.input-box,
+.signup-form > input,
+.password-reset-form > input {
+    border: 1px solid var(--auth-line) !important;
+    border-radius: var(--auth-input-radius) !important;
+
+    background: #fbfcfb !important;
+
+    box-sizing: border-box !important;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease !important;
+}
+
+.input-box:hover,
+.signup-form > input:hover,
+.password-reset-form > input:hover {
+    border-color: #c5d3c8 !important;
+    background: #ffffff !important;
+}
+
+.input-box:focus-within,
+.signup-form > input:focus,
+.password-reset-form > input:focus {
+    border-color: var(--auth-green-600) !important;
+
+    background: #ffffff !important;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(112, 141, 120, 0.12) !important;
+}
+
+/* 로그인 입력 */
+.login-page .input-box input {
+    height: 44px !important;
+    min-height: 44px !important;
+
+    padding: 0 13px !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    color: var(--auth-text) !important;
+    background: transparent !important;
+
+    font-size: 12px !important;
+}
+
+.login-page .input-icon {
+    width: 42px !important;
+    flex: 0 0 42px !important;
+
+    color: var(--auth-green-600) !important;
+    background: var(--auth-green-100) !important;
+
+    font-size: 10px !important;
+}
+
+/* 회원가입 입력 */
+.signup-page .signup-form > input {
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+
+    margin: 0 !important;
+    padding: 0 13px !important;
+
+    color: var(--auth-text) !important;
+
+    font-size: 12px !important;
+}
+
+/* 비밀번호 찾기 입력 */
+.password-reset-page .password-reset-form > input {
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+
+    margin: 0 !important;
+    padding: 0 13px !important;
+
+    color: var(--auth-text) !important;
+
+    font-size: 12px !important;
+}
+
+/* =========================================================
+   회원가입 폼 2열
+   ========================================================= */
+
+.signup-form {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr) !important;
+
+    grid-template-rows:
+        auto 44px
+        auto 44px
+        auto 44px
+        auto auto !important;
+
+    column-gap: 16px !important;
+    row-gap: 7px !important;
+
+    align-items: end !important;
+}
+
+/* 아이디 */
+.signup-form > label:nth-of-type(1) {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+}
+
+.signup-form > input:nth-of-type(1) {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+}
+
+/* 닉네임 */
+.signup-form > label:nth-of-type(2) {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+}
+
+.signup-form > input:nth-of-type(2) {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+}
+
+/* 이메일 */
+.signup-form > label:nth-of-type(3) {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+}
+
+.signup-form > input:nth-of-type(3) {
+    grid-column: 1 !important;
+    grid-row: 4 !important;
+}
+
+/* 휴대전화 */
+.signup-form > label:nth-of-type(4) {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+}
+
+.signup-form > input:nth-of-type(4) {
+    grid-column: 2 !important;
+    grid-row: 4 !important;
+}
+
+/* 비밀번호 */
+.signup-form > label:nth-of-type(5) {
+    grid-column: 1 !important;
+    grid-row: 5 !important;
+}
+
+.signup-form > input:nth-of-type(5) {
+    grid-column: 1 !important;
+    grid-row: 6 !important;
+}
+
+/* 비밀번호 확인 */
+.signup-form > label:nth-of-type(6) {
+    grid-column: 2 !important;
+    grid-row: 5 !important;
+}
+
+.signup-form > input:nth-of-type(6) {
+    grid-column: 2 !important;
+    grid-row: 6 !important;
+}
+
+.signup-required-guide {
+    grid-column: 1 / -1 !important;
+    grid-row: 7 !important;
+
+    margin: 3px 0 0 !important;
+
+    color: #849087 !important;
+
+    font-size: 9px !important;
+}
+
+.signup-submit {
+    grid-column: 1 / -1 !important;
+    grid-row: 8 !important;
+}
+
+/* =========================================================
+   공통 버튼
+   ========================================================= */
+
+.login-button,
+.signup-submit,
+.password-reset-submit {
+    width: 100% !important;
+    height: 45px !important;
+    min-height: 45px !important;
+
+    margin-top: 12px !important;
+
+    border: 0 !important;
+    border-radius: 11px !important;
+
+    color: #ffffff !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #58735f,
+            #78917d
+        ) !important;
+
+    box-shadow:
+        0 10px 23px
+        rgba(67, 96, 75, 0.16) !important;
+
+    font-size: 12px !important;
+    font-weight: 850 !important;
+
+    cursor: pointer !important;
+}
+
+.login-button:hover,
+.signup-submit:hover,
+.password-reset-submit:hover {
+    background:
+        linear-gradient(
+            135deg,
+            #4d6855,
+            #688472
+        ) !important;
+
+    transform: translateY(-1px) !important;
+}
+
+/* =========================================================
+   로그인 하단 보조 영역
+   ========================================================= */
+
+.login-form {
+    margin-top: 0 !important;
+}
+
+.form-options {
+    margin: 11px 0 13px !important;
+
+    color: var(--auth-muted) !important;
+
+    font-size: 9px !important;
+}
+
+.login-page .check-label input {
+    width: 13px !important;
+    height: 13px !important;
+    min-height: 13px !important;
+}
+
+.login-recovery-links {
+    gap: 8px !important;
+}
+
+.login-recovery-links a {
+    color: var(--auth-green-700) !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+}
+
+.guest-login-area {
+    margin-top: 12px !important;
+    padding: 11px 12px !important;
+
+    gap: 7px !important;
+
+    border: 1px solid var(--auth-line) !important;
+    border-radius: 12px !important;
+
+    background: #f8faf8 !important;
+}
+
+.guest-login-area span {
+    color: var(--auth-muted) !important;
+    font-size: 10px !important;
+}
+
+.guest-login-button {
+    min-height: 39px !important;
+
+    border-radius: 10px !important;
+
+    color: var(--auth-green-800) !important;
+    background: var(--auth-green-100) !important;
+
+    font-size: 11px !important;
+}
+
+.login-signup-link,
+.signup-login-link,
+.password-reset-links {
+    margin-top: 12px !important;
+
+    gap: 7px !important;
+
+    color: #89948c !important;
+
+    font-size: 10px !important;
+}
+
+.login-signup-link a,
+.signup-login-link a,
+.password-reset-links a {
+    color: var(--auth-green-700) !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+}
+
+.login-footer {
+    display: none !important;
+}
+
+/* =========================================================
+   비밀번호 찾기 인증방법 카드
+   ========================================================= */
+
+.reset-method-grid {
+    gap: 8px !important;
+    margin-top: 6px !important;
+}
+
+.reset-method-card-inner {
+    min-height: 72px !important;
+
+    padding: 10px 12px !important;
+
+    grid-template-columns:
+        40px minmax(0, 1fr) 20px !important;
+
+    gap: 10px !important;
+
+    border: 1px solid var(--auth-line) !important;
+    border-radius: 12px !important;
+
+    background: #fbfcfb !important;
+}
+
+.reset-method-icon {
+    width: 40px !important;
+    height: 40px !important;
+
+    border-radius: 11px !important;
+
+    background: var(--auth-green-100) !important;
+
+    font-size: 18px !important;
+}
+
+.reset-method-copy strong {
+    color: var(--auth-text) !important;
+    font-size: 13px !important;
+}
+
+.reset-method-copy small,
+.reset-method-copy p {
+    margin-top: 3px !important;
+
+    color: var(--auth-muted) !important;
+
+    font-size: 9px !important;
+    line-height: 1.35 !important;
+}
+
+.reset-method-check span {
+    width: 15px !important;
+    height: 15px !important;
+}
+
+/* =========================================================
+   반응형
+   ========================================================= */
+
+@media (max-height: 760px) and (min-width: 901px) {
+    .login-container,
+    .signup-layout,
+    .password-reset-layout {
+        min-height: 500px !important;
+    }
+
+    .login-visual,
+    .signup-intro,
+    .password-reset-intro,
+    .login-panel,
+    .signup-card,
+    .password-reset-card {
+        min-height: 500px !important;
+        padding-top: 28px !important;
+        padding-bottom: 24px !important;
+    }
+
+    .visual-content h1,
+    .signup-intro h1,
+    .password-reset-intro h1 {
+        font-size: 38px !important;
+    }
+
+    .service-features,
+    .signup-benefits,
+    .password-reset-steps {
+        margin-top: 18px !important;
+        gap: 7px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .login-page,
+    .signup-page,
+    .password-reset-page {
+        min-height: calc(100svh - 142px) !important;
+
+        padding: 20px 13px 40px !important;
+
+        overflow: visible !important;
+    }
+
+    .login-container,
+    .signup-layout,
+    .password-reset-layout {
+        grid-template-columns: 1fr !important;
+
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+
+        overflow: visible !important;
+    }
+
+    .login-visual,
+    .signup-intro,
+    .password-reset-intro,
+    .login-panel,
+    .signup-card,
+    .password-reset-card {
+        min-height: 0 !important;
+        height: auto !important;
+
+        overflow: visible !important;
+    }
+
+    .signup-form {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: none !important;
+
+        gap: 7px !important;
+    }
+
+    .signup-form > label,
+    .signup-form > input,
+    .signup-required-guide,
+    .signup-submit {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+    }
+}
+
+/* =========================================================
+   인증 화면 헤더·카드 조화 통일
+   로그인 / 회원가입 / 아이디 찾기 / 비밀번호 찾기 전용
+   홈페이지 헤더에는 영향 없음
+   ========================================================= */
+
+/* 인증 페이지 배경을 헤더 뒤까지 자연스럽게 연결 */
+body:has(.login-page),
+body:has(.signup-page),
+body:has(.password-reset-page) {
+    background:
+        linear-gradient(
+            180deg,
+            #f7faf8 0%,
+            #f2f6f3 100%
+        ) !important;
+}
+
+/* 인증 페이지에서만 헤더를 낮고 가볍게 */
+body:has(.login-page) header.tt-header,
+body:has(.signup-page) header.tt-header,
+body:has(.password-reset-page) header.tt-header {
+    height: 82px !important;
+    min-height: 82px !important;
+
+    border-bottom: 0 !important;
+
+    background:
+        rgba(247, 250, 248, 0.96) !important;
+
+    box-shadow: none !important;
+}
+
+/* 인증 카드와 같은 중심축·폭으로 헤더 배치 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width: min(1160px, calc(100% - 48px)) !important;
+
+    height: 82px !important;
+    min-height: 82px !important;
+
+    margin: 0 auto !important;
+}
+
+/* 로고를 인증 카드 분위기에 맞게 축소 */
+body:has(.login-page) .tt-header-logo,
+body:has(.signup-page) .tt-header-logo,
+body:has(.password-reset-page) .tt-header-logo {
+    gap: 10px !important;
+}
+
+body:has(.login-page) .tt-header-logo-icon,
+body:has(.signup-page) .tt-header-logo-icon,
+body:has(.password-reset-page) .tt-header-logo-icon {
+    width: 43px !important;
+    height: 43px !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            #75917c,
+            #91aa96
+        ) !important;
+
+    font-size: 20px !important;
+
+    box-shadow:
+        0 8px 18px
+        rgba(64, 91, 71, 0.13) !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy strong,
+body:has(.signup-page) .tt-header-logo-copy strong,
+body:has(.password-reset-page) .tt-header-logo-copy strong {
+    color: #3d5847 !important;
+    font-size: 20px !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy small,
+body:has(.signup-page) .tt-header-logo-copy small,
+body:has(.password-reset-page) .tt-header-logo-copy small {
+    color: #87928a !important;
+    font-size: 9px !important;
+}
+
+/* 오른쪽 메뉴를 인증 화면에서는 한 덩어리처럼 압축 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner > .tt-header-right {
+    height: 56px !important;
+
+    grid-template-rows:
+        18px 27px !important;
+
+    row-gap: 5px !important;
+}
+
+/* 로그인·회원가입 */
+body:has(.login-page) .tt-header-account,
+body:has(.signup-page) .tt-header-account,
+body:has(.password-reset-page) .tt-header-account {
+    gap: 13px !important;
+}
+
+body:has(.login-page) .tt-header-account a,
+body:has(.signup-page) .tt-header-account a,
+body:has(.password-reset-page) .tt-header-account a {
+    color: #718078 !important;
+
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
+body:has(.login-page) .tt-header-account a.current,
+body:has(.signup-page) .tt-header-account a.current,
+body:has(.password-reset-page) .tt-header-account a.current {
+    color: #385344 !important;
+}
+
+/* 홈·대여소·QR 메뉴 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    gap: 22px !important;
+}
+
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    padding-bottom: 5px !important;
+
+    color: #53635a !important;
+
+    font-size: 12px !important;
+    font-weight: 750 !important;
+}
+
+/* 헤더와 인증 카드 사이 공백 축소 */
+body:has(.login-page) .login-page,
+body:has(.signup-page) .signup-page,
+body:has(.password-reset-page) .password-reset-page {
+    min-height:
+        calc(
+            100svh
+            - 82px
+        ) !important;
+
+    padding-top: 14px !important;
+}
+
+/* 인증 카드의 상단 위치와 헤더 폭을 시각적으로 연결 */
+body:has(.login-page) .login-container,
+body:has(.signup-page) .signup-layout,
+body:has(.password-reset-page) .password-reset-layout {
+    border:
+        1px solid
+        rgba(66, 94, 74, 0.12) !important;
+
+    box-shadow:
+        0 23px 58px
+        rgba(44, 68, 51, 0.12),
+        0 4px 14px
+        rgba(44, 68, 51, 0.045) !important;
+}
+
+/* 카드 왼쪽 초록 패널과 로고의 색감 연결 */
+body:has(.login-page) .login-visual,
+body:has(.signup-page) .signup-intro,
+body:has(.password-reset-page) .password-reset-intro {
+    background:
+        radial-gradient(
+            circle at 88% 12%,
+            rgba(230, 255, 225, 0.15),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            #496a53 0%,
+            #66836d 52%,
+            #91a996 100%
+        ) !important;
+}
+
+/* 카드 우측의 지나치게 넓은 흰 여백 완화 */
+body:has(.login-page) .login-panel,
+body:has(.signup-page) .signup-card,
+body:has(.password-reset-page) .password-reset-card {
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff 0%,
+            #fbfdfb 100%
+        ) !important;
+}
+
+/* 작은 노트북 */
+@media (max-width: 1100px) {
+    body:has(.login-page)
+    header.tt-header > #ttHeaderInner,
+    body:has(.signup-page)
+    header.tt-header > #ttHeaderInner,
+    body:has(.password-reset-page)
+    header.tt-header > #ttHeaderInner {
+        width: calc(100% - 32px) !important;
+    }
+
+    body:has(.login-page) .tt-header-nav,
+    body:has(.signup-page) .tt-header-nav,
+    body:has(.password-reset-page) .tt-header-nav {
+        gap: 15px !important;
+    }
+}
+
+/* =========================================================
+   인증 화면 헤더·카드 조화 통일 끝
+   ========================================================= */
+
+/* =========================================================
+   인증 페이지 조화형 최종 디자인
+   왼쪽과 오른쪽을 단절된 반쪽이 아닌 하나의 카드로 연결
+   ========================================================= */
+
+/* 전체 인증 카드 */
+.login-container,
+.signup-layout,
+.password-reset-layout {
+    width: min(1060px, calc(100% - 40px)) !important;
+    min-height: 530px !important;
+
+    grid-template-columns:
+        minmax(360px, 0.9fr)
+        minmax(500px, 1.1fr) !important;
+
+    position: relative !important;
+    isolation: isolate !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(70, 97, 77, 0.1) !important;
+    border-radius: 30px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            #68836f 0%,
+            #78917d 42%,
+            #eef4ef 42%,
+            #f8faf8 100%
+        ) !important;
+
+    box-shadow:
+        0 24px 60px rgba(44, 68, 51, 0.13),
+        0 6px 18px rgba(44, 68, 51, 0.05) !important;
+}
+
+/* 가운데 딱 잘린 선 대신 부드러운 연결 영역 */
+.login-container::before,
+.signup-layout::before,
+.password-reset-layout::before {
+    content: "";
+
+    width: 120px;
+    height: 120%;
+
+    position: absolute;
+    top: -10%;
+    left: 42%;
+    z-index: 2;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(117, 143, 123, 0.82) 0%,
+            rgba(211, 224, 214, 0.62) 48%,
+            rgba(248, 250, 248, 0) 100%
+        );
+
+    filter: blur(22px);
+    pointer-events: none;
+}
+
+/* =========================================================
+   왼쪽 소개 영역
+   ========================================================= */
+
+.login-visual,
+.signup-intro,
+.password-reset-intro {
+    min-height: 530px !important;
+    padding: 48px 50px !important;
+
+    position: relative !important;
+    z-index: 1 !important;
+
+    justify-content: center !important;
+
+    background:
+        radial-gradient(
+            circle at 88% 12%,
+            rgba(255, 255, 255, 0.13),
+            transparent 30%
+        ),
+        linear-gradient(
+            145deg,
+            #4d6d56 0%,
+            #66826d 55%,
+            #829a86 100%
+        ) !important;
+}
+
+/* 왼쪽 아래 흐릿한 장식은 너무 싸 보여서 제거 */
+.login-visual::after,
+.signup-intro::after,
+.password-reset-intro::after {
+    display: none !important;
+}
+
+/* 왼쪽 제목 영역 폭 정리 */
+.visual-content,
+.signup-intro > *,
+.password-reset-intro > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+
+.visual-content h1,
+.signup-intro h1,
+.password-reset-intro h1 {
+    max-width: 430px !important;
+
+    font-size:
+        clamp(
+            38px,
+            3.6vw,
+            49px
+        ) !important;
+
+    line-height: 1.1 !important;
+}
+
+/* 단계 카드가 너무 크지 않게 */
+.service-features,
+.signup-benefits,
+.password-reset-steps {
+    max-width: 400px !important;
+    margin-top: 25px !important;
+    gap: 9px !important;
+}
+
+.service-features article,
+.signup-benefits div,
+.password-reset-steps > div {
+    min-height: 48px !important;
+    padding: 9px 14px !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 14px !important;
+
+    background:
+        rgba(255, 255, 255, 0.07) !important;
+
+    box-shadow: none !important;
+}
+
+/* =========================================================
+   오른쪽 영역
+   큰 흰 판이 아니라 내부 폼 카드로 구성
+   ========================================================= */
+
+.login-panel,
+.signup-card,
+.password-reset-card {
+    min-height: 530px !important;
+    padding: 34px 42px !important;
+
+    position: relative !important;
+    z-index: 4 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: transparent !important;
+}
+
+/* 오른쪽 실제 내용 폭 제한 */
+.login-panel > *,
+.signup-card > *,
+.password-reset-card > * {
+    width: 100% !important;
+    max-width: 520px !important;
+}
+
+/* 제목 + 폼을 하나의 은은한 내부 카드처럼 */
+.login-panel::before,
+.signup-card::before,
+.password-reset-card::before {
+    content: "";
+
+    width: calc(100% - 52px);
+    max-width: 570px;
+    height: calc(100% - 52px);
+
+    position: absolute;
+    top: 26px;
+    right: 26px;
+    bottom: 26px;
+    z-index: -1;
+
+    border: 1px solid rgba(82, 108, 88, 0.08);
+    border-radius: 24px;
+
+    background:
+        rgba(255, 255, 255, 0.82);
+
+    box-shadow:
+        0 16px 38px rgba(49, 72, 55, 0.075);
+
+    backdrop-filter: blur(12px);
+}
+
+/* 오른쪽 콘텐츠는 세로 중앙보다 약간 위 */
+.login-panel,
+.signup-card,
+.password-reset-card {
+    padding-top: 48px !important;
+    padding-bottom: 42px !important;
+}
+
+/* 제목 간격 */
+.login-heading,
+.signup-card-heading,
+.password-reset-heading {
+    margin-bottom: 20px !important;
+}
+
+.login-heading h2,
+.signup-card-heading h2,
+.password-reset-heading h2 {
+    font-size: 31px !important;
+    margin-bottom: 7px !important;
+}
+
+.login-heading p,
+.signup-card-heading p,
+.password-reset-heading p {
+    max-width: 500px !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+}
+
+/* 입력칸 */
+.login-page .input-box,
+.signup-page .signup-form > input,
+.password-reset-page .password-reset-form > input {
+    border-color: #d7e1da !important;
+    background: rgba(255, 255, 255, 0.93) !important;
+
+    box-shadow:
+        0 4px 10px rgba(54, 78, 59, 0.025) !important;
+}
+
+.login-page .input-box:focus-within,
+.signup-page .signup-form > input:focus,
+.password-reset-page .password-reset-form > input:focus {
+    border-color: #78937f !important;
+
+    box-shadow:
+        0 0 0 3px rgba(120, 147, 127, 0.12),
+        0 5px 13px rgba(54, 78, 59, 0.04) !important;
+}
+
+/* 메인 버튼 */
+.login-button,
+.signup-submit,
+.password-reset-submit {
+    background:
+        linear-gradient(
+            135deg,
+            #526f5b,
+            #78917d
+        ) !important;
+
+    box-shadow:
+        0 11px 24px rgba(63, 91, 70, 0.16) !important;
+}
+
+/* 하단 링크 */
+.login-signup-link,
+.signup-login-link,
+.password-reset-links {
+    justify-content: center !important;
+}
+
+/* =========================================================
+   헤더도 카드 중심축에 맞춤
+   ========================================================= */
+
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width: min(1060px, calc(100% - 40px)) !important;
+}
+
+/* 인증 페이지 헤더와 카드가 자연스럽게 이어지도록 */
+body:has(.login-page) header.tt-header,
+body:has(.signup-page) header.tt-header,
+body:has(.password-reset-page) header.tt-header {
+    background:
+        linear-gradient(
+            180deg,
+            #fbfcfb 0%,
+            #f7faf8 100%
+        ) !important;
+}
+
+/* 카드 상단 공백 조금 줄임 */
+.login-page,
+.signup-page,
+.password-reset-page {
+    padding-top: 12px !important;
+}
+
+/* 낮은 화면 */
+@media (max-height: 760px) and (min-width: 901px) {
+    .login-container,
+    .signup-layout,
+    .password-reset-layout {
+        min-height: 480px !important;
+    }
+
+    .login-visual,
+    .signup-intro,
+    .password-reset-intro,
+    .login-panel,
+    .signup-card,
+    .password-reset-card {
+        min-height: 480px !important;
+    }
+
+    .login-visual,
+    .signup-intro,
+    .password-reset-intro {
+        padding: 34px 40px !important;
+    }
+
+    .login-panel,
+    .signup-card,
+    .password-reset-card {
+        padding: 34px 38px !important;
+    }
+}
+
+/* 모바일에서는 부드러운 경계 제거 후 세로 배치 */
+@media (max-width: 900px) {
+    .login-container,
+    .signup-layout,
+    .password-reset-layout {
+        grid-template-columns: 1fr !important;
+        background: #ffffff !important;
+    }
+
+    .login-container::before,
+    .signup-layout::before,
+    .password-reset-layout::before {
+        display: none !important;
+    }
+
+    .login-panel::before,
+    .signup-card::before,
+    .password-reset-card::before {
+        display: none !important;
+    }
+}
+
+/* =========================================================
+   조화형 인증 화면 끝
+   ========================================================= */
+
+/* =========================================================
+   인증 화면 균형형 2패널 디자인
+   구분은 명확하게, 색감·여백·리듬은 통일
+   ========================================================= */
+
+/* 전체 카드 */
+.login-container,
+.signup-layout,
+.password-reset-layout {
+    width: min(1060px, calc(100% - 40px)) !important;
+    min-height: 530px !important;
+    height: auto !important;
+
+    position: relative !important;
+    isolation: isolate !important;
+
+    display: grid !important;
+    grid-template-columns:
+        minmax(370px, 0.9fr)
+        minmax(520px, 1.1fr) !important;
+
+    overflow: hidden !important;
+
+    border: 1px solid #dce5df !important;
+    border-radius: 28px !important;
+
+    background: #ffffff !important;
+
+    box-shadow:
+        0 24px 58px rgba(45, 68, 52, 0.12),
+        0 5px 16px rgba(45, 68, 52, 0.045) !important;
+}
+
+/* 이전에 추가한 흐린 연결 영역 제거 */
+.login-container::before,
+.signup-layout::before,
+.password-reset-layout::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* =========================================================
+   왼쪽 안내 패널
+   ========================================================= */
+
+.login-visual,
+.signup-intro,
+.password-reset-intro {
+    min-height: 530px !important;
+    height: auto !important;
+
+    padding: 46px 48px !important;
+
+    position: relative !important;
+    z-index: 1 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+
+    overflow: hidden !important;
+
+    border-right: 1px solid rgba(255, 255, 255, 0.13) !important;
+
+    color: #ffffff !important;
+
+    background:
+        radial-gradient(
+            circle at 86% 11%,
+            rgba(255, 255, 255, 0.12),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            #4c6b55 0%,
+            #64806b 58%,
+            #819986 100%
+        ) !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 이전 흐린 자전거·장식 제거 */
+.login-visual::after,
+.signup-intro::after,
+.password-reset-intro::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* 상단 원형 장식은 약하게 유지 */
+.login-visual::before,
+.signup-intro::before,
+.password-reset-intro::before {
+    width: 210px !important;
+    height: 210px !important;
+
+    top: -108px !important;
+    right: -76px !important;
+
+    display: block !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.025) !important;
+}
+
+/* 왼쪽 제목 */
+.visual-content h1,
+.signup-intro h1,
+.password-reset-intro h1 {
+    max-width: 430px !important;
+
+    margin: 0 0 17px !important;
+
+    color: #ffffff !important;
+
+    font-size: clamp(38px, 3.6vw, 49px) !important;
+    font-weight: 850 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.055em !important;
+}
+
+/* 왼쪽 설명 */
+.visual-content > p,
+.signup-intro > p,
+.password-reset-intro > p {
+    max-width: 420px !important;
+
+    margin: 0 !important;
+
+    color: rgba(255, 255, 255, 0.78) !important;
+
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+}
+
+/* 왼쪽 단계·기능 카드 */
+.service-features,
+.signup-benefits,
+.password-reset-steps {
+    width: 100% !important;
+    max-width: 420px !important;
+
+    margin-top: 27px !important;
+
+    display: grid !important;
+    gap: 9px !important;
+}
+
+.service-features article,
+.signup-benefits div,
+.password-reset-steps > div {
+    min-height: 48px !important;
+
+    padding: 9px 14px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 11px !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.19) !important;
+    border-radius: 12px !important;
+
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+
+    box-sizing: border-box !important;
+}
+
+/* =========================================================
+   오른쪽 입력 패널
+   ========================================================= */
+
+.login-panel,
+.signup-card,
+.password-reset-card {
+    min-height: 530px !important;
+    height: auto !important;
+
+    padding: 46px 50px !important;
+
+    position: relative !important;
+    z-index: 1 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+
+    overflow: visible !important;
+
+    color: #314238 !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff 0%,
+            #fafcfb 100%
+        ) !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 이전 오른쪽 내부 카드 제거 */
+.login-panel::before,
+.signup-card::before,
+.password-reset-card::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* 이전 내용 폭 강제값 제거 */
+.login-panel > *,
+.signup-card > *,
+.password-reset-card > * {
+    width: auto !important;
+    max-width: none !important;
+}
+
+/* 오른쪽 제목 위치와 크기 통일 */
+.login-heading,
+.signup-card-heading,
+.password-reset-heading {
+    width: 100% !important;
+    margin: 0 0 21px !important;
+}
+
+.login-heading h2,
+.signup-card-heading h2,
+.password-reset-heading h2 {
+    margin: 7px 0 7px !important;
+
+    color: #304238 !important;
+
+    font-size: 30px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.045em !important;
+}
+
+.login-heading p,
+.signup-card-heading p,
+.password-reset-heading p {
+    max-width: 500px !important;
+
+    margin: 0 !important;
+
+    color: #7a867e !important;
+
+    font-size: 11px !important;
+    line-height: 1.55 !important;
+}
+
+/* =========================================================
+   양쪽 구성요소 높이와 모서리 통일
+   ========================================================= */
+
+.login-page .input-box,
+.signup-page .signup-form > input,
+.password-reset-page .password-reset-form > input {
+    height: 44px !important;
+    min-height: 44px !important;
+
+    border: 1px solid #d9e2dc !important;
+    border-radius: 12px !important;
+
+    background: #ffffff !important;
+
+    box-shadow: none !important;
+
+    box-sizing: border-box !important;
+}
+
+.login-button,
+.signup-submit,
+.password-reset-submit {
+    height: 45px !important;
+    min-height: 45px !important;
+
+    border-radius: 12px !important;
+
+    background: #6d8974 !important;
+
+    box-shadow:
+        0 9px 20px rgba(65, 91, 71, 0.14) !important;
+}
+
+.login-button:hover,
+.signup-submit:hover,
+.password-reset-submit:hover {
+    background: #5d7965 !important;
+}
+
+/* 선택·보조 박스도 같은 디자인 */
+.guest-login-area,
+.reset-method-card-inner {
+    border: 1px solid #dce5df !important;
+    border-radius: 12px !important;
+
+    background: #f7faf8 !important;
+
+    box-shadow: none !important;
+}
+
+/* =========================================================
+   비밀번호 찾기처럼 내용이 적은 화면
+   오른쪽 콘텐츠가 지나치게 위에 뜨지 않도록 중앙 배치
+   ========================================================= */
+
+.password-reset-card {
+    justify-content: center !important;
+}
+
+.password-reset-heading,
+.password-reset-form,
+.password-reset-links,
+.reset-method-grid {
+    width: 100% !important;
+}
+
+/* =========================================================
+   회원가입은 폼이 많으므로 같은 패널 안에서 조밀하게
+   ========================================================= */
+
+.signup-card {
+    justify-content: center !important;
+}
+
+.signup-form {
+    width: 100% !important;
+}
+
+/* =========================================================
+   인증 페이지 헤더와 카드 간격
+   ========================================================= */
+
+body:has(.login-page) .login-page,
+body:has(.signup-page) .signup-page,
+body:has(.password-reset-page) .password-reset-page {
+    padding-top: 18px !important;
+    padding-bottom: 24px !important;
+}
+
+/* 카드와 헤더의 중심 폭을 동일하게 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width: min(1060px, calc(100% - 40px)) !important;
+}
+
+/* =========================================================
+   낮은 화면
+   ========================================================= */
+
+@media (max-height: 760px) and (min-width: 901px) {
+    .login-container,
+    .signup-layout,
+    .password-reset-layout {
+        min-height: 480px !important;
+    }
+
+    .login-visual,
+    .signup-intro,
+    .password-reset-intro,
+    .login-panel,
+    .signup-card,
+    .password-reset-card {
+        min-height: 480px !important;
+        padding-top: 32px !important;
+        padding-bottom: 28px !important;
+    }
+}
+
+/* =========================================================
+   모바일
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .login-container,
+    .signup-layout,
+    .password-reset-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .login-visual,
+    .signup-intro,
+    .password-reset-intro {
+        border-right: 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+    }
+}
+
+/* =========================================================
+   균형형 2패널 디자인 끝
+   ========================================================= */
+
+/* =========================================================
+   인증 화면 헤더 영역 / 카드 영역 분리
+   구분은 명확하게, 색감은 카드와 조화롭게
+   ========================================================= */
+
+/* 인증 페이지 전체 배경 */
+body:has(.login-page),
+body:has(.signup-page),
+body:has(.password-reset-page) {
+    background: #f2f6f3 !important;
+}
+
+/* ---------------------------------------------------------
+   상단 헤더 영역
+   밝은 흰색으로 별도 영역 형성
+   --------------------------------------------------------- */
+
+body:has(.login-page) header.tt-header,
+body:has(.signup-page) header.tt-header,
+body:has(.password-reset-page) header.tt-header {
+    height: 96px !important;
+    min-height: 96px !important;
+
+    position: relative !important;
+    z-index: 20 !important;
+
+    border-bottom:
+        1px solid
+        rgba(73, 101, 81, 0.16) !important;
+
+    background:
+        rgba(255, 255, 255, 0.98) !important;
+
+    box-shadow:
+        0 8px 24px
+        rgba(48, 73, 55, 0.045) !important;
+}
+
+/* 헤더 아래에 얇은 초록 포인트 라인 */
+body:has(.login-page) header.tt-header::after,
+body:has(.signup-page) header.tt-header::after,
+body:has(.password-reset-page) header.tt-header::after {
+    content: "";
+
+    width: 100%;
+    height: 3px;
+
+    position: absolute;
+    right: 0;
+    bottom: -3px;
+    left: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(91, 126, 101, 0) 0%,
+            rgba(91, 126, 101, 0.38) 18%,
+            rgba(91, 126, 101, 0.38) 82%,
+            rgba(91, 126, 101, 0) 100%
+        );
+}
+
+/* 헤더 내부 폭 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width:
+        min(
+            1380px,
+            calc(100% - 64px)
+        ) !important;
+
+    height: 96px !important;
+    min-height: 96px !important;
+
+    margin: 0 auto !important;
+}
+
+/* 로고는 헤더 왼쪽 중앙에 자연스럽게 */
+body:has(.login-page) .tt-header-logo,
+body:has(.signup-page) .tt-header-logo,
+body:has(.password-reset-page) .tt-header-logo {
+    align-self: center !important;
+}
+
+body:has(.login-page) .tt-header-logo-icon,
+body:has(.signup-page) .tt-header-logo-icon,
+body:has(.password-reset-page) .tt-header-logo-icon {
+    width: 48px !important;
+    height: 48px !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            #79947f,
+            #94aa98
+        ) !important;
+
+    box-shadow:
+        0 8px 20px
+        rgba(66, 94, 74, 0.14) !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy strong,
+body:has(.signup-page) .tt-header-logo-copy strong,
+body:has(.password-reset-page) .tt-header-logo-copy strong {
+    color: #3d5947 !important;
+    font-size: 22px !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy small,
+body:has(.signup-page) .tt-header-logo-copy small,
+body:has(.password-reset-page) .tt-header-logo-copy small {
+    color: #87928b !important;
+    font-size: 10px !important;
+}
+
+/* 오른쪽 메뉴를 헤더 내부에서 위·아래 정렬 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner > .tt-header-right {
+    height: 66px !important;
+
+    display: grid !important;
+    grid-template-rows:
+        21px 31px !important;
+
+    align-content: center !important;
+    justify-items: end !important;
+
+    row-gap: 7px !important;
+}
+
+/* 로그인 / 회원가입 */
+body:has(.login-page) .tt-header-account,
+body:has(.signup-page) .tt-header-account,
+body:has(.password-reset-page) .tt-header-account {
+    gap: 16px !important;
+}
+
+body:has(.login-page) .tt-header-account a,
+body:has(.signup-page) .tt-header-account a,
+body:has(.password-reset-page) .tt-header-account a {
+    color: #748078 !important;
+
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+/* 서비스 메뉴 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    gap: 27px !important;
+}
+
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    padding-bottom: 6px !important;
+
+    color: #4f6056 !important;
+
+    font-size: 13px !important;
+    font-weight: 750 !important;
+}
+
+/* ---------------------------------------------------------
+   아래 인증 콘텐츠 영역
+   헤더와 확실히 다른 연한 초록 배경
+   --------------------------------------------------------- */
+
+body:has(.login-page) .login-page,
+body:has(.signup-page) .signup-page,
+body:has(.password-reset-page) .password-reset-page {
+    min-height:
+        calc(
+            100svh
+            - 96px
+        ) !important;
+
+    padding:
+        36px 24px 42px !important;
+
+    position: relative !important;
+
+    background:
+        radial-gradient(
+            circle at 8% 10%,
+            rgba(114, 148, 123, 0.13),
+            transparent 31%
+        ),
+        radial-gradient(
+            circle at 95% 88%,
+            rgba(191, 211, 196, 0.22),
+            transparent 29%
+        ),
+        linear-gradient(
+            145deg,
+            #eef4ef 0%,
+            #f7faf8 52%,
+            #edf3ee 100%
+        ) !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 콘텐츠 영역 상단에 아주 은은한 안쪽 그림자 */
+body:has(.login-page) .login-page::before,
+body:has(.signup-page) .signup-page::before,
+body:has(.password-reset-page) .password-reset-page::before {
+    content: "";
+
+    width: 100%;
+    height: 18px;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(54, 79, 61, 0.055),
+            rgba(54, 79, 61, 0)
+        );
+}
+
+/* 인증 카드는 배경 위에서 또렷하게 */
+body:has(.login-page) .login-container,
+body:has(.signup-page) .signup-layout,
+body:has(.password-reset-page) .password-reset-layout {
+    position: relative !important;
+    z-index: 2 !important;
+
+    border:
+        1px solid
+        rgba(67, 94, 74, 0.12) !important;
+
+    box-shadow:
+        0 27px 65px
+        rgba(43, 67, 50, 0.14),
+        0 6px 18px
+        rgba(43, 67, 50, 0.045) !important;
+}
+
+/* 낮은 화면에서는 여백만 줄임 */
+@media (max-height: 760px) and (min-width: 901px) {
+    body:has(.login-page) .login-page,
+    body:has(.signup-page) .signup-page,
+    body:has(.password-reset-page) .password-reset-page {
+        padding:
+            18px 22px 22px !important;
+    }
+}
+
+/* =========================================================
+   인증 화면 헤더 / 카드 영역 분리 끝
+   ========================================================= */
+
+/* =========================================================
+   인증 화면 헤더 최종 압축
+   로그인·회원가입·계정 찾기 화면 전용
+   ========================================================= */
+
+/* 헤더 높이 축소 */
+body:has(.login-page) header.tt-header,
+body:has(.signup-page) header.tt-header,
+body:has(.password-reset-page) header.tt-header {
+    height: 78px !important;
+    min-height: 78px !important;
+
+    border-bottom: 1px solid rgba(65, 91, 71, 0.16) !important;
+    background: #ffffff !important;
+
+    box-shadow:
+        0 5px 16px
+        rgba(42, 66, 49, 0.045) !important;
+}
+
+/* 기존 3px 굵은 장식선 제거 */
+body:has(.login-page) header.tt-header::after,
+body:has(.signup-page) header.tt-header::after,
+body:has(.password-reset-page) header.tt-header::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* 로고와 메뉴를 같은 중심선에 배치 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width: min(1320px, calc(100% - 48px)) !important;
+    height: 78px !important;
+    min-height: 78px !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* 로고 크기 */
+body:has(.login-page) .tt-header-logo,
+body:has(.signup-page) .tt-header-logo,
+body:has(.password-reset-page) .tt-header-logo {
+    gap: 10px !important;
+}
+
+body:has(.login-page) .tt-header-logo-icon,
+body:has(.signup-page) .tt-header-logo-icon,
+body:has(.password-reset-page) .tt-header-logo-icon {
+    width: 46px !important;
+    height: 46px !important;
+
+    font-size: 21px !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy strong,
+body:has(.signup-page) .tt-header-logo-copy strong,
+body:has(.password-reset-page) .tt-header-logo-copy strong {
+    font-size: 22px !important;
+    font-weight: 850 !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy small,
+body:has(.signup-page) .tt-header-logo-copy small,
+body:has(.password-reset-page) .tt-header-logo-copy small {
+    font-size: 10px !important;
+}
+
+/* 오른쪽 두 줄 메뉴를 하나의 묶음으로 고정 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner > .tt-header-right {
+    width: max-content !important;
+    height: 58px !important;
+
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+
+    display: grid !important;
+    grid-template-rows: 21px 29px !important;
+    justify-items: end !important;
+    align-content: center !important;
+
+    row-gap: 5px !important;
+}
+
+/* 위쪽 로그인·회원가입 */
+body:has(.login-page) .tt-header-account,
+body:has(.signup-page) .tt-header-account,
+body:has(.password-reset-page) .tt-header-account {
+    width: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    gap: 13px !important;
+}
+
+body:has(.login-page) .tt-header-account a,
+body:has(.signup-page) .tt-header-account a,
+body:has(.password-reset-page) .tt-header-account a {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #65736a !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+body:has(.login-page) .tt-header-account a.current,
+body:has(.signup-page) .tt-header-account a.current,
+body:has(.password-reset-page) .tt-header-account a.current {
+    color: #304c39 !important;
+    font-weight: 850 !important;
+}
+
+/* 아래쪽 서비스 메뉴 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    width: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    gap: 20px !important;
+}
+
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    margin: 0 !important;
+    padding: 0 0 5px !important;
+
+    color: #43564a !important;
+
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.025em !important;
+}
+
+/* 활성 메뉴 밑줄 */
+body:has(.login-page) .tt-header-nav a.active::after,
+body:has(.signup-page) .tt-header-nav a.active::after,
+body:has(.password-reset-page) .tt-header-nav a.active::after {
+    height: 2px !important;
+    background: #718e78 !important;
+}
+
+/* =========================================================
+   인증 카드 글자 크기 정돈
+   너무 작고 빈약하게 보이는 부분 보정
+   ========================================================= */
+
+/* 오른쪽 영문 상단 라벨 */
+.login-heading .eyebrow,
+.signup-card-heading span,
+.password-reset-heading span {
+    font-size: 10px !important;
+    letter-spacing: 0.18em !important;
+}
+
+/* 오른쪽 제목 */
+.login-heading h2,
+.signup-card-heading h2,
+.password-reset-heading h2 {
+    font-size: 32px !important;
+    line-height: 1.13 !important;
+}
+
+/* 오른쪽 설명 */
+.login-heading p,
+.signup-card-heading p,
+.password-reset-heading p {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+}
+
+/* 입력 라벨 */
+.login-form > label,
+.signup-form > label,
+.password-reset-form > label {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+/* 입력칸 글씨 */
+.login-page .input-box input,
+.signup-page .signup-form > input,
+.password-reset-page .password-reset-form > input {
+    font-size: 13px !important;
+}
+
+/* 메인 버튼 글씨 */
+.login-button,
+.signup-submit,
+.password-reset-submit {
+    font-size: 13px !important;
+    font-weight: 850 !important;
+}
+
+/* 왼쪽 제목 */
+.visual-content h1,
+.signup-intro h1,
+.password-reset-intro h1 {
+    font-size: clamp(40px, 3.4vw, 50px) !important;
+    line-height: 1.08 !important;
+}
+
+/* 왼쪽 설명 */
+.visual-content > p,
+.signup-intro > p,
+.password-reset-intro > p {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+}
+
+/* 왼쪽 단계 카드 글자 */
+.service-features strong,
+.signup-benefits strong,
+.password-reset-steps strong {
+    font-size: 13px !important;
+}
+
+/* 헤더가 줄어든 만큼 인증 영역 높이 조정 */
+body:has(.login-page) .login-page,
+body:has(.signup-page) .signup-page,
+body:has(.password-reset-page) .password-reset-page {
+    min-height: calc(100svh - 78px) !important;
+    padding-top: 22px !important;
+}
+
+/* 노트북 폭 */
+@media (max-width: 1150px) {
+    body:has(.login-page)
+    header.tt-header > #ttHeaderInner,
+    body:has(.signup-page)
+    header.tt-header > #ttHeaderInner,
+    body:has(.password-reset-page)
+    header.tt-header > #ttHeaderInner {
+        width: calc(100% - 32px) !important;
+    }
+
+    body:has(.login-page) .tt-header-nav,
+    body:has(.signup-page) .tt-header-nav,
+    body:has(.password-reset-page) .tt-header-nav {
+        gap: 15px !important;
+    }
+
+    body:has(.login-page) .tt-header-nav a,
+    body:has(.signup-page) .tt-header-nav a,
+    body:has(.password-reset-page) .tt-header-nav a {
+        font-size: 13px !important;
+    }
+}
+
+/* =========================================================
+   인증 화면 헤더 최종 압축 끝
+   ========================================================= */
+
+/* =========================================================
+   인증 페이지 헤더 — 로고와 메뉴를 한곳에 모으기
+   홈페이지에는 적용하지 않음
+   ========================================================= */
+
+/* 인증 화면 헤더 높이 */
+body:has(.login-page) header.tt-header,
+body:has(.signup-page) header.tt-header,
+body:has(.password-reset-page) header.tt-header {
+    height: 80px !important;
+    min-height: 80px !important;
+
+    border-bottom: 1px solid #d9e4dc !important;
+    background: #ffffff !important;
+    box-shadow: 0 5px 16px rgba(47, 71, 53, 0.04) !important;
+}
+
+/*
+   핵심:
+   양 끝 정렬 제거
+   카드 위 중앙에서 로고와 메뉴를 가까이 배치
+*/
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width: min(1060px, calc(100% - 40px)) !important;
+    height: 80px !important;
+    min-height: 80px !important;
+
+    margin: 0 auto !important;
+    padding: 0 22px !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 58px !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 로고 */
+body:has(.login-page) .tt-header-logo,
+body:has(.signup-page) .tt-header-logo,
+body:has(.password-reset-page) .tt-header-logo {
+    flex: 0 0 auto !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    gap: 10px !important;
+}
+
+body:has(.login-page) .tt-header-logo-icon,
+body:has(.signup-page) .tt-header-logo-icon,
+body:has(.password-reset-page) .tt-header-logo-icon {
+    width: 46px !important;
+    height: 46px !important;
+
+    font-size: 21px !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy strong,
+body:has(.signup-page) .tt-header-logo-copy strong,
+body:has(.password-reset-page) .tt-header-logo-copy strong {
+    font-size: 21px !important;
+    font-weight: 850 !important;
+}
+
+body:has(.login-page) .tt-header-logo-copy small,
+body:has(.signup-page) .tt-header-logo-copy small,
+body:has(.password-reset-page) .tt-header-logo-copy small {
+    font-size: 9px !important;
+}
+
+/* 오른쪽 메뉴 묶음 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner > .tt-header-right {
+    flex: 0 0 auto !important;
+
+    width: max-content !important;
+    height: 58px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    position: static !important;
+
+    display: grid !important;
+    grid-template-rows: 20px 29px !important;
+    justify-items: start !important;
+    align-content: center !important;
+
+    row-gap: 6px !important;
+
+    transform: none !important;
+}
+
+/* 위: 로그인 / 회원가입 */
+body:has(.login-page) .tt-header-account,
+body:has(.signup-page) .tt-header-account,
+body:has(.password-reset-page) .tt-header-account {
+    width: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    gap: 13px !important;
+}
+
+body:has(.login-page) .tt-header-account a,
+body:has(.signup-page) .tt-header-account a,
+body:has(.password-reset-page) .tt-header-account a {
+    font-size: 12px !important;
+    font-weight: 750 !important;
+}
+
+/* 아래: 서비스 메뉴 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    width: max-content !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    gap: 18px !important;
+}
+
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    margin: 0 !important;
+    padding: 0 0 5px !important;
+
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.025em !important;
+}
+
+/* 헤더와 인증 카드 사이도 과하게 벌어지지 않게 */
+body:has(.login-page) .login-page,
+body:has(.signup-page) .signup-page,
+body:has(.password-reset-page) .password-reset-page {
+    min-height: calc(100svh - 80px) !important;
+    padding-top: 18px !important;
+}
+
+/* 1200px 이하에서는 간격 조금 더 축소 */
+@media (max-width: 1200px) {
+    body:has(.login-page)
+    header.tt-header > #ttHeaderInner,
+    body:has(.signup-page)
+    header.tt-header > #ttHeaderInner,
+    body:has(.password-reset-page)
+    header.tt-header > #ttHeaderInner {
+        gap: 38px !important;
+    }
+
+    body:has(.login-page) .tt-header-nav,
+    body:has(.signup-page) .tt-header-nav,
+    body:has(.password-reset-page) .tt-header-nav {
+        gap: 14px !important;
+    }
+}
+
+/* =========================================================
+   인증 페이지 헤더 그룹 정렬 끝
+   ========================================================= */
+
+/* =========================================================
+   인증 페이지 헤더 균형 복구
+   로고와 메뉴는 카드 양쪽 선에 맞추고
+   메뉴 내부 간격만 촘촘하게 유지
+   ========================================================= */
+
+body:has(.login-page)
+header.tt-header > #ttHeaderInner,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner {
+    width: min(1180px, calc(100% - 48px)) !important;
+    height: 84px !important;
+    min-height: 84px !important;
+
+    margin: 0 auto !important;
+    padding: 0 18px !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 헤더 자체 높이 */
+body:has(.login-page) header.tt-header,
+body:has(.signup-page) header.tt-header,
+body:has(.password-reset-page) header.tt-header {
+    height: 84px !important;
+    min-height: 84px !important;
+}
+
+/* 로고는 왼쪽 */
+body:has(.login-page) .tt-header-logo,
+body:has(.signup-page) .tt-header-logo,
+body:has(.password-reset-page) .tt-header-logo {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+}
+
+/* 오른쪽 메뉴는 오른쪽 정렬 */
+body:has(.login-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner > .tt-header-right {
+    flex: 0 0 auto !important;
+
+    width: max-content !important;
+    height: 60px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: grid !important;
+    grid-template-rows: 20px 30px !important;
+    justify-items: end !important;
+    align-content: center !important;
+
+    row-gap: 6px !important;
+}
+
+/* 로그인 / 회원가입 */
+body:has(.login-page) .tt-header-account,
+body:has(.signup-page) .tt-header-account,
+body:has(.password-reset-page) .tt-header-account {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 14px !important;
+}
+
+body:has(.login-page) .tt-header-account a,
+body:has(.signup-page) .tt-header-account a,
+body:has(.password-reset-page) .tt-header-account a {
+    font-size: 12px !important;
+    font-weight: 750 !important;
+}
+
+/* 서비스 메뉴 내부만 촘촘하게 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 18px !important;
+}
+
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+}
+
+/* 카드 폭도 헤더 중심축과 맞춤 */
+body:has(.login-page) .login-container,
+body:has(.signup-page) .signup-layout,
+body:has(.password-reset-page) .password-reset-layout {
+    width: min(1180px, calc(100% - 48px)) !important;
+}
+
+/* 인증 콘텐츠 시작 위치 */
+body:has(.login-page) .login-page,
+body:has(.signup-page) .signup-page,
+body:has(.password-reset-page) .password-reset-page {
+    min-height: calc(100svh - 84px) !important;
+    padding-top: 20px !important;
+}
+
+/* =========================================================
+   인증 페이지 서비스 메뉴를 헤더 하단선 가까이 배치
+   로그인·회원가입 줄은 그대로 유지
+   ========================================================= */
+
+body:has(.login-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.signup-page)
+header.tt-header > #ttHeaderInner > .tt-header-right,
+body:has(.password-reset-page)
+header.tt-header > #ttHeaderInner > .tt-header-right {
+    height: 70px !important;
+
+    grid-template-rows:
+        20px 34px !important;
+
+    align-content: end !important;
+    row-gap: 6px !important;
+
+    padding-bottom: 7px !important;
+    box-sizing: border-box !important;
+}
+
+/* 위쪽 로그인 / 회원가입은 현재 위치 유지 */
+body:has(.login-page) .tt-header-account,
+body:has(.signup-page) .tt-header-account,
+body:has(.password-reset-page) .tt-header-account {
+    align-self: start !important;
+    transform: none !important;
+}
+
+/* 아래쪽 서비스 메뉴만 하단선 쪽으로 이동 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    align-self: end !important;
+    transform: translateY(5px) !important;
+}
+
+/* 메뉴 글자와 활성 밑줄도 하단에 자연스럽게 붙도록 */
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    padding-bottom: 7px !important;
+}
+
+body:has(.login-page) .tt-header-nav a.active::after,
+body:has(.signup-page) .tt-header-nav a.active::after,
+body:has(.password-reset-page) .tt-header-nav a.active::after {
+    bottom: 0 !important;
+}
+
+/* =========================================================
+   인증 페이지 서비스 메뉴 글자 크기 확대
+   위치와 간격은 그대로 유지
+   ========================================================= */
+
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.03em !important;
+}
+
+/* 로그인 / 회원가입도 비율에 맞게 소폭 확대 */
+body:has(.login-page) .tt-header-account a,
+body:has(.signup-page) .tt-header-account a,
+body:has(.password-reset-page) .tt-header-account a {
+    font-size: 13px !important;
+    font-weight: 750 !important;
+}
+
+/* 화면이 조금 좁을 때만 과밀 방지 */
+@media (max-width: 1150px) {
+    body:has(.login-page) .tt-header-nav a,
+    body:has(.signup-page) .tt-header-nav a,
+    body:has(.password-reset-page) .tt-header-nav a {
+        font-size: 14px !important;
+    }
+}
+
+/* 인증 페이지 하단 서비스 메뉴만 확대 */
+body:has(.login-page) .tt-header-nav a,
+body:has(.signup-page) .tt-header-nav a,
+body:has(.password-reset-page) .tt-header-nav a {
+    font-size: 17px !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.035em !important;
+}
+
+/* 메뉴가 커진 만큼 간격만 약간 조정 */
+body:has(.login-page) .tt-header-nav,
+body:has(.signup-page) .tt-header-nav,
+body:has(.password-reset-page) .tt-header-nav {
+    gap: 20px !important;
+}
+
+/* 노트북 폭에서는 살짝 축소 */
+@media (max-width: 1150px) {
+    body:has(.login-page) .tt-header-nav a,
+    body:has(.signup-page) .tt-header-nav a,
+    body:has(.password-reset-page) .tt-header-nav a {
+        font-size: 16px !important;
+    }
+
+    body:has(.login-page) .tt-header-nav,
+    body:has(.signup-page) .tt-header-nav,
+    body:has(.password-reset-page) .tt-header-nav {
+        gap: 17px !important;
+    }
+}
+
+/* =========================================================
+   로그인 페이지만 좌측 확대 + 세로 높이 증가
+   회원가입·계정 찾기 화면에는 영향 없음
+   ========================================================= */
+
+/* 전체 로그인 카드 */
+.login-page .login-container {
+    width: min(1180px, calc(100% - 48px)) !important;
+
+    min-height: 585px !important;
+    height: min(610px, calc(100svh - 124px)) !important;
+    max-height: calc(100svh - 124px) !important;
+
+    grid-template-columns:
+        minmax(0, 0.98fr)
+        minmax(0, 1.02fr) !important;
+}
+
+/* 왼쪽 안내 패널 */
+.login-page .login-visual {
+    min-height: 585px !important;
+    height: 100% !important;
+
+    padding: 50px 54px !important;
+}
+
+/* 오른쪽 로그인 패널 */
+.login-page .login-panel {
+    min-height: 585px !important;
+    height: 100% !important;
+
+    padding:
+        46px 50px 38px !important;
+}
+
+/* 왼쪽 큰 제목 폭을 넓어진 패널에 맞춤 */
+.login-page .visual-content h1 {
+    max-width: 520px !important;
+
+    font-size:
+        clamp(
+            43px,
+            3.7vw,
+            54px
+        ) !important;
+
+    line-height: 1.08 !important;
+}
+
+/* 왼쪽 설명도 조금 넓게 */
+.login-page .visual-content > p {
+    max-width: 480px !important;
+}
+
+/* 왼쪽 기능 카드 폭 */
+.login-page .service-features {
+    width: 100% !important;
+    max-width: 470px !important;
+
+    margin-top: 31px !important;
+}
+
+/* 기능 카드 세로 높이를 약간 키워 균형 조정 */
+.login-page .service-features article {
+    min-height: 55px !important;
+
+    padding:
+        10px 15px !important;
+}
+
+/* 오른쪽 로그인 내용이 너무 퍼지지 않도록 제한 */
+.login-page .login-panel > * {
+    width: 100% !important;
+    max-width: 540px !important;
+
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+
+/* 낮은 노트북 화면에서는 스크롤 방지를 위해 높이만 자동 축소 */
+@media (max-height: 760px) and (min-width: 901px) {
+    .login-page .login-container {
+        min-height: 520px !important;
+        height: calc(100svh - 108px) !important;
+        max-height: calc(100svh - 108px) !important;
+    }
+
+    .login-page .login-visual,
+    .login-page .login-panel {
+        min-height: 520px !important;
+    }
+
+    .login-page .login-visual {
+        padding:
+            36px 46px !important;
+    }
+
+    .login-page .login-panel {
+        padding:
+            32px 44px 28px !important;
+    }
+
+    .login-page .visual-content h1 {
+        font-size: 43px !important;
+    }
+
+    .login-page .service-features {
+        margin-top: 21px !important;
+    }
+
+    .login-page .service-features article {
+        min-height: 48px !important;
+    }
+}
+
+/* =========================================================
+   로그인 비율 조정 끝
+   ========================================================= */
+
+/* =========================================================
+   로그인 페이지 비율 수정
+   전체 카드 크기는 유지
+   왼쪽을 넓히고 오른쪽을 좁혀 세로형으로 표현
+   ========================================================= */
+
+/* 로그인 페이지는 화면 안에서만 표시 */
+body:has(.login-page) .login-page {
+    height: calc(100svh - 84px) !important;
+    min-height: 0 !important;
+
+    padding: 16px 24px 22px !important;
+
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/*
+   카드 자체를 키우지 않음
+   이전에 추가한 585px / 610px 높이 규칙 해제
+*/
+.login-page .login-container {
+    width: min(1180px, calc(100% - 48px)) !important;
+
+    height: min(530px, calc(100svh - 122px)) !important;
+    min-height: 0 !important;
+    max-height: calc(100svh - 122px) !important;
+
+    /*
+       왼쪽 약 58%
+       오른쪽 약 42%
+    */
+    grid-template-columns:
+        minmax(0, 1.38fr)
+        minmax(400px, 1fr) !important;
+}
+
+/* 왼쪽 영역은 넓어진 비율에 맞게 사용 */
+.login-page .login-visual {
+    height: 100% !important;
+    min-height: 0 !important;
+
+    padding: 42px 52px !important;
+}
+
+/* 왼쪽 제목이 너무 크게 퍼지지 않게 */
+.login-page .visual-content h1 {
+    max-width: 560px !important;
+
+    font-size: clamp(42px, 3.5vw, 52px) !important;
+    line-height: 1.08 !important;
+}
+
+/* 왼쪽 설명 */
+.login-page .visual-content > p {
+    max-width: 510px !important;
+}
+
+/* 왼쪽 기능 카드 */
+.login-page .service-features {
+    width: 100% !important;
+    max-width: 520px !important;
+
+    margin-top: 25px !important;
+}
+
+.login-page .service-features article {
+    min-height: 50px !important;
+    padding: 9px 14px !important;
+}
+
+/* 오른쪽은 좁고 세로형으로 보이게 */
+.login-page .login-panel {
+    height: 100% !important;
+    min-height: 0 !important;
+
+    padding: 36px 38px 30px !important;
+
+    justify-content: center !important;
+}
+
+/* 이전에 적용한 540px 내용 폭 제한 제거 */
+.login-page .login-panel > * {
+    width: 100% !important;
+    max-width: none !important;
+
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* 오른쪽 입력칸은 좁아진 패널 폭을 그대로 사용 */
+.login-page .login-heading,
+.login-page .login-form,
+.login-page .guest-login-area,
+.login-page .login-signup-link {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* 입력칸과 버튼은 높이를 늘리지 않음 */
+.login-page .input-box input {
+    height: 44px !important;
+    min-height: 44px !important;
+}
+
+.login-page .login-button {
+    height: 45px !important;
+    min-height: 45px !important;
+}
+
+.login-page .guest-login-button {
+    min-height: 39px !important;
+}
+
+/* 낮은 화면에서도 카드가 화면 밖으로 나가지 않게 */
+@media (max-height: 720px) and (min-width: 901px) {
+    body:has(.login-page) .login-page {
+        padding-top: 10px !important;
+        padding-bottom: 12px !important;
+    }
+
+    .login-page .login-container {
+        height: calc(100svh - 106px) !important;
+        max-height: calc(100svh - 106px) !important;
+    }
+
+    .login-page .login-visual {
+        padding: 28px 42px !important;
+    }
+
+    .login-page .login-panel {
+        padding: 24px 34px 20px !important;
+    }
+
+    .login-page .visual-content h1 {
+        font-size: 40px !important;
+    }
+
+    .login-page .service-features {
+        margin-top: 17px !important;
+    }
+
+    .login-page .service-features article {
+        min-height: 43px !important;
+    }
+}
+
+/* =========================================================
+   로그인 페이지 비율 수정 끝
+   ========================================================= */
+
+/* =========================================================
+   로그인 페이지 왼쪽 패널 정비
+   카드 전체 크기와 좌우 비율은 변경하지 않음
+   ========================================================= */
+
+/* 왼쪽 콘텐츠를 안정적으로 중앙 정렬 */
+.login-page .login-visual {
+    padding: 44px 58px !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 실제 텍스트 묶음 폭 제한 */
+.login-page .visual-content {
+    width: 100% !important;
+    max-width: 650px !important;
+
+    margin: 0 auto !important;
+}
+
+/* 상단 자전거 아이콘 */
+.login-page .large-bike {
+    margin: 0 0 18px !important;
+
+    font-size: 42px !important;
+    line-height: 1 !important;
+}
+
+/* 영문 라벨 */
+.login-page .service-label {
+    margin: 0 0 21px !important;
+
+    color: rgba(255, 255, 255, 0.82) !important;
+
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.21em !important;
+}
+
+/* 큰 제목
+   넓어진 왼쪽 패널에 맞게 지나치게 큰 크기를 줄임 */
+.login-page .visual-content h1 {
+    width: 100% !important;
+    max-width: 640px !important;
+
+    margin: 0 0 22px !important;
+
+    color: #ffffff !important;
+
+    font-size: clamp(42px, 3.25vw, 54px) !important;
+    font-weight: 850 !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.055em !important;
+
+    word-break: keep-all !important;
+    text-wrap: balance !important;
+}
+
+/* 설명문 */
+.login-page .visual-content > p {
+    width: 100% !important;
+    max-width: 520px !important;
+
+    margin: 0 !important;
+
+    color: rgba(255, 255, 255, 0.81) !important;
+
+    font-size: 14px !important;
+    font-weight: 450 !important;
+    line-height: 1.72 !important;
+    letter-spacing: -0.018em !important;
+
+    word-break: keep-all !important;
+}
+
+/* 기능 카드 묶음
+   왼쪽 전체 폭을 다 쓰지 않고 적당한 폭으로 제한 */
+.login-page .service-features {
+    width: 100% !important;
+    max-width: 560px !important;
+
+    margin: 31px 0 0 !important;
+
+    display: grid !important;
+    gap: 11px !important;
+}
+
+/* 기능 카드 */
+.login-page .service-features article {
+    width: 100% !important;
+    min-height: 62px !important;
+
+    margin: 0 !important;
+    padding: 10px 17px !important;
+
+    display: grid !important;
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 15px !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 15px !important;
+
+    background: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: none !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 번호 원 */
+.login-page .service-features article > span {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    flex: 0 0 46px !important;
+
+    margin: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 50% !important;
+
+    color: #efffe9 !important;
+    background: rgba(173, 214, 179, 0.42) !important;
+
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+}
+
+/* 카드 안 텍스트 묶음 */
+.login-page .service-features article > div {
+    min-width: 0 !important;
+}
+
+/* 기능 제목 */
+.login-page .service-features strong {
+    display: block !important;
+
+    margin: 0 !important;
+
+    color: #ffffff !important;
+
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.025em !important;
+}
+
+/* 기능 설명 */
+.login-page .service-features article p {
+    margin: 5px 0 0 !important;
+
+    color: rgba(255, 255, 255, 0.67) !important;
+
+    font-size: 11px !important;
+    font-weight: 450 !important;
+    line-height: 1.35 !important;
+    letter-spacing: -0.015em !important;
+}
+
+/* 아래 도시 실루엣은 더 약하게 */
+.login-page .city-line {
+    opacity: 0.075 !important;
+}
+
+/* 큰 원형 장식도 제목보다 튀지 않게 */
+.login-page .login-visual::before {
+    opacity: 0.68 !important;
+}
+
+/* 낮은 화면에서도 카드 크기는 그대로 두고 내부만 압축 */
+@media (max-height: 760px) and (min-width: 901px) {
+    .login-page .login-visual {
+        padding: 30px 50px !important;
+    }
+
+    .login-page .large-bike {
+        margin-bottom: 12px !important;
+        font-size: 35px !important;
+    }
+
+    .login-page .service-label {
+        margin-bottom: 15px !important;
+        font-size: 10px !important;
+    }
+
+    .login-page .visual-content h1 {
+        margin-bottom: 15px !important;
+        font-size: 42px !important;
+    }
+
+    .login-page .visual-content > p {
+        font-size: 12px !important;
+        line-height: 1.55 !important;
+    }
+
+    .login-page .service-features {
+        margin-top: 19px !important;
+        gap: 8px !important;
+    }
+
+    .login-page .service-features article {
+        min-height: 50px !important;
+        padding: 7px 13px !important;
+
+        grid-template-columns: 38px minmax(0, 1fr) !important;
+        column-gap: 12px !important;
+    }
+
+    .login-page .service-features article > span {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+    }
+
+    .login-page .service-features strong {
+        font-size: 13px !important;
+    }
+
+    .login-page .service-features article p {
+        margin-top: 2px !important;
+        font-size: 9px !important;
+    }
+}
+
+/* =========================================================
+   로그인 페이지 왼쪽 패널 정비 끝
+   ========================================================= */
+
+/* =========================================================
+   회원가입 폼 간격 정리
+   라벨과 입력칸은 가깝게
+   입력 행과 다음 행 사이는 명확하게
+   ========================================================= */
+
+/* 오른쪽 폼 영역의 불필요한 여백 축소 */
+.signup-page .signup-card {
+    padding:
+        38px 46px 32px !important;
+}
+
+/* 제목과 폼 사이 */
+.signup-page .signup-card-heading {
+    margin-bottom: 18px !important;
+}
+
+/*
+   한 묶음:
+   라벨
+   입력칸
+
+   묶음 사이만 간격을 확보하기 위해
+   행별 간격을 직접 지정한다.
+*/
+.signup-page .signup-form {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr) !important;
+
+    grid-template-rows:
+        auto 46px
+        auto 46px
+        auto 46px
+        auto auto !important;
+
+    column-gap: 18px !important;
+    row-gap: 0 !important;
+
+    align-items: end !important;
+}
+
+/* 모든 라벨 공통 */
+.signup-page .signup-form > label {
+    margin: 0 0 6px !important;
+
+    align-self: end !important;
+
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+}
+
+/* 두 번째·세 번째 입력 행의 라벨 위쪽 간격 */
+.signup-page .signup-form > label:nth-of-type(3),
+.signup-page .signup-form > label:nth-of-type(4),
+.signup-page .signup-form > label:nth-of-type(5),
+.signup-page .signup-form > label:nth-of-type(6) {
+    padding-top: 16px !important;
+}
+
+/* 입력칸 */
+.signup-page .signup-form > input {
+    width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+
+    margin: 0 !important;
+    padding: 0 14px !important;
+
+    border-radius: 11px !important;
+
+    font-size: 13px !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 필수 항목 안내 */
+.signup-page .signup-required-guide {
+    margin: 13px 0 0 !important;
+
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+}
+
+/* 회원가입 버튼 */
+.signup-page .signup-submit {
+    height: 46px !important;
+    min-height: 46px !important;
+
+    margin-top: 13px !important;
+}
+
+/* 하단 로그인 링크 */
+.signup-page .signup-login-link {
+    margin-top: 13px !important;
+}
+
+/* =========================================================
+   왼쪽 회원 혜택 영역 정리
+   ========================================================= */
+
+.signup-page .signup-intro > p {
+    max-width: 500px !important;
+
+    font-size: 14px !important;
+    line-height: 1.65 !important;
+}
+
+/* 회원 혜택 카드 */
+.signup-page .signup-benefits {
+    margin-top: 28px !important;
+    gap: 10px !important;
+}
+
+.signup-page .signup-benefits div {
+    min-height: 56px !important;
+
+    padding: 11px 16px !important;
+
+    border-radius: 14px !important;
+}
+
+.signup-page .signup-benefits span {
+    min-width: 27px !important;
+
+    font-size: 10px !important;
+}
+
+.signup-page .signup-benefits strong {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+}
+
+/* 낮은 화면에서도 잘리지 않게 내부만 축소 */
+@media (max-height: 760px) and (min-width: 901px) {
+    .signup-page .signup-card {
+        padding:
+            25px 40px 21px !important;
+    }
+
+    .signup-page .signup-card-heading {
+        margin-bottom: 12px !important;
+    }
+
+    .signup-page .signup-form {
+        grid-template-rows:
+            auto 40px
+            auto 40px
+            auto 40px
+            auto auto !important;
+    }
+
+    .signup-page .signup-form > label {
+        margin-bottom: 4px !important;
+        font-size: 11px !important;
+    }
+
+    .signup-page .signup-form > label:nth-of-type(3),
+    .signup-page .signup-form > label:nth-of-type(4),
+    .signup-page .signup-form > label:nth-of-type(5),
+    .signup-page .signup-form > label:nth-of-type(6) {
+        padding-top: 9px !important;
+    }
+
+    .signup-page .signup-form > input {
+        height: 40px !important;
+        min-height: 40px !important;
+    }
+
+    .signup-page .signup-required-guide {
+        margin-top: 8px !important;
+    }
+
+    .signup-page .signup-submit {
+        height: 41px !important;
+        min-height: 41px !important;
+        margin-top: 8px !important;
+    }
+
+    .signup-page .signup-login-link {
+        margin-top: 8px !important;
+    }
+
+    .signup-page .signup-benefits {
+        margin-top: 18px !important;
+        gap: 7px !important;
+    }
+
+    .signup-page .signup-benefits div {
+        min-height: 43px !important;
+        padding: 7px 12px !important;
+    }
+}
+
+/* =========================================================
+   회원가입 폼 간격 정리 끝
+   ========================================================= */

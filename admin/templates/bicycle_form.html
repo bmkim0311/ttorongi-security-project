@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if page_mode == "create" %}
+        자전거 등록
+    {% else %}
+        자전거 수정
+    {% endif %}
+    | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="detail-heading">
+    <div>
+        <a
+            href="{%
+                if page_mode == 'edit'
+            %}{{ url_for(
+                'bicycle_detail_admin',
+                bicycle_id=bicycle.id
+            ) }}{%
+                else
+            %}{{ url_for('bicycles') }}{%
+                endif
+            %}"
+            class="back-link"
+        >
+            ←
+            {% if page_mode == "edit" %}
+                자전거 상세
+            {% else %}
+                자전거 목록
+            {% endif %}
+        </a>
+
+        <span class="page-eyebrow">
+            BICYCLE CONFIGURATION
+        </span>
+
+        <h1>
+            {% if page_mode == "create" %}
+                새 자전거 등록
+            {% else %}
+                자전거 정보 수정
+            {% endif %}
+        </h1>
+
+        <p>
+            자전거 식별 정보와 배치·운영 상태를 설정합니다.
+        </p>
+    </div>
+</section>
+
+{% if active_rental %}
+    <section class="active-rental-notice">
+        <div>
+            <strong>현재 대여 중인 자전거입니다.</strong>
+
+            <p>
+                {{ active_rental.user_name or active_rental.username }}
+                이용자가
+                {{ active_rental.rental_time }}부터 이용 중입니다.
+                대여 종료 전에는 상태와 배치 대여소를 변경할 수 없습니다.
+            </p>
+        </div>
+
+        <span>
+            대여 번호 #{{ active_rental.id }}
+        </span>
+    </section>
+{% endif %}
+
+<form
+    action="{%
+        if page_mode == 'create'
+    %}{{ url_for('bicycle_create') }}{%
+        else
+    %}{{ url_for(
+        'bicycle_edit',
+        bicycle_id=bicycle.id
+    ) }}{%
+        endif
+    %}"
+    method="post"
+    class="station-form-layout"
+>
+    <input
+        type="hidden"
+        name="_csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    IDENTIFICATION
+                </span>
+
+                <h2>식별 정보</h2>
+            </div>
+        </div>
+
+        <div class="admin-form-grid">
+            <label class="admin-form-field">
+                <span>
+                    자전거 코드
+                    <em>필수</em>
+                </span>
+
+                <input
+                    type="text"
+                    name="bicycle_code"
+                    value="{{ bicycle.bicycle_code or '' }}"
+                    placeholder="예: BIKE-001"
+                    maxlength="40"
+                    pattern="[A-Za-z0-9_-]{3,40}"
+                    required
+                >
+
+                <small>
+                    영문 대문자, 숫자, 하이픈, 밑줄을 사용할 수 있습니다.
+                </small>
+            </label>
+
+            <label class="admin-form-field">
+                <span>
+                    QR 코드
+                    <em>필수</em>
+                </span>
+
+                <input
+                    type="text"
+                    name="qr_code"
+                    value="{{ bicycle.qr_code or '' }}"
+                    placeholder="예: MzI6NQ=="
+                    maxlength="100"
+                    pattern="(?=.{3,100}$)[A-Za-z0-9+/_-]+={0,2}"
+                    required
+                >
+
+                <small>
+                    사용자 QR 대여 화면에서 입력하거나 스캔하는 값입니다.
+                    Base64 패딩 문자 = 또는 ==도 사용할 수 있습니다.
+                </small>
+            </label>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    OPERATION SETTINGS
+                </span>
+
+                <h2>운영 설정</h2>
+            </div>
+        </div>
+
+        <div class="admin-form-grid">
+            <label class="admin-form-field">
+                <span>
+                    배치 대여소
+                </span>
+
+                <select
+                    name="station_id"
+                    {% if active_rental %}
+                        disabled
+                    {% endif %}
+                >
+                    <option value="">
+                        미배치
+                    </option>
+
+                    {% for station in stations %}
+                        <option
+                            value="{{ station.id }}"
+                            {% if bicycle.station_id == station.id %}
+                                selected
+                            {% endif %}
+                            {% if (
+                                station.status == 'closed'
+                                or station.bicycle_count >= station.capacity
+                            ) and bicycle.station_id != station.id %}
+                                disabled
+                            {% endif %}
+                        >
+                            {{ station.station_name }}
+                            ·
+                            {{ station.bicycle_count }}/{{ station.capacity }}대
+                            ·
+                            {{
+                                {
+                                    "normal": "정상",
+                                    "inspection": "점검",
+                                    "closed": "중단"
+                                }.get(
+                                    station.status,
+                                    station.status
+                                )
+                            }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                {% if active_rental %}
+                    <input
+                        type="hidden"
+                        name="station_id"
+                        value="{{ bicycle.station_id or '' }}"
+                    >
+                {% endif %}
+
+                <small>
+                    운영 중단 또는 수용량이 가득 찬 대여소에는 배치할 수 없습니다.
+                </small>
+            </label>
+
+            <label class="admin-form-field">
+                <span>
+                    자전거 상태
+                    <em>필수</em>
+                </span>
+
+                <select
+                    name="status"
+                    required
+                    {% if active_rental %}
+                        disabled
+                    {% endif %}
+                >
+                    {% for value, label in bicycle_status_labels.items() %}
+                        <option
+                            value="{{ value }}"
+                            {% if bicycle.status == value %}
+                                selected
+                            {% endif %}
+                            {% if page_mode == "create" and value == "renting" %}
+                                disabled
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                {% if active_rental %}
+                    <input
+                        type="hidden"
+                        name="status"
+                        value="renting"
+                    >
+                {% endif %}
+            </label>
+
+            <label class="admin-form-field">
+                <span>
+                    배터리
+                    <em>필수</em>
+                </span>
+
+                <div class="battery-input-row">
+                    <input
+                        id="battery_level"
+                        type="range"
+                        name="battery_level"
+                        value="{{ bicycle.battery_level if bicycle.battery_level is not none else 100 }}"
+                        min="0"
+                        max="100"
+                        step="1"
+                        required
+                        oninput="
+                            document.getElementById(
+                                'battery_value'
+                            ).textContent = this.value + '%';
+                        "
+                    >
+
+                    <strong id="battery_value">
+                        {{ bicycle.battery_level if bicycle.battery_level is not none else 100 }}%
+                    </strong>
+                </div>
+
+                <small>
+                    배터리가 10% 미만이면 대여 가능 상태로 설정할 수 없습니다.
+                </small>
+            </label>
+
+            {% if page_mode == "edit" %}
+                <div class="admin-form-field">
+                    <span>
+                        최근 점검
+                    </span>
+
+                    <div class="read-only-field">
+                        {{ bicycle.last_checked_at or "점검 기록 없음" }}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="bicycle-status-guide">
+        <article>
+            <span class="bicycle-state bicycle-state-available">
+                대여 가능
+            </span>
+
+            <p>
+                정상 배치되어 사용자가 즉시 대여할 수 있는 상태입니다.
+            </p>
+        </article>
+
+        <article>
+            <span class="bicycle-state bicycle-state-maintenance">
+                정비 중
+            </span>
+
+            <p>
+                정비 작업 중이며 사용자 대여 대상에서 제외됩니다.
+            </p>
+        </article>
+
+        <article>
+            <span class="bicycle-state bicycle-state-broken">
+                고장
+            </span>
+
+            <p>
+                고장이 확인되어 정비 작업 배정이 필요한 상태입니다.
+            </p>
+        </article>
+
+        <article>
+            <span class="bicycle-state bicycle-state-reserved">
+                예약
+            </span>
+
+            <p>
+                특정 이용 또는 운영 작업을 위해 임시로 예약된 상태입니다.
+            </p>
+        </article>
+    </section>
+
+    <div class="form-action-bar">
+        <a
+            href="{%
+                if page_mode == 'edit'
+            %}{{ url_for(
+                'bicycle_detail_admin',
+                bicycle_id=bicycle.id
+            ) }}{%
+                else
+            %}{{ url_for('bicycles') }}{%
+                endif
+            %}"
+            class="secondary-button"
+        >
+            취소
+        </a>
+
+        <button
+            type="submit"
+            class="primary-button"
+        >
+            {% if page_mode == "create" %}
+                자전거 등록
+            {% else %}
+                변경 내용 저장
+            {% endif %}
+        </button>
+    </div>
+</form>
+{% endblock %}

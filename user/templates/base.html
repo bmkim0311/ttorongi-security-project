@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            또롱이 공공자전거
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}?v=user-notices-final-20260725-1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='pass.css') }}?v=20260728041916"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='auth-unified.css') }}?v=20260725-15"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='notice.css') }}?v=20260725-body-spacing-1"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='inquiry.css') }}?v=20260725-1"
+    >
+</head>
+
+<body>
+    <header class="tt-header">
+    <div class="tt-header-inner" id="ttHeaderInner">
+        <a
+            href="{{ url_for('service_root') }}"
+            class="tt-header-logo"
+            aria-label="또롱이 서비스 홈"
+        >
+            <span class="tt-header-logo-icon">
+                🚲
+            </span>
+
+            <span class="tt-header-logo-copy">
+                <strong>
+                    또롱이
+                </strong>
+
+                <small>
+                    공공자전거 통합운영기관
+                </small>
+            </span>
+        </a>
+
+        {% if session.get("username") %}
+            <div class="tt-header-right">
+                <div class="tt-header-account">
+                    <a
+                        href="{{ url_for('account_profile') }}"
+                        class="tt-header-user"
+                    >
+                        {{ session.get("name") or session.get("username") }}님
+                    </a>
+
+                    <a href="{{ url_for('logout') }}">
+                        로그아웃
+                    </a>
+                </div>
+
+                <nav
+                    class="tt-header-nav"
+                    aria-label="회원 서비스 메뉴"
+                >
+                    <a
+                        href="{{ url_for('home') if session.get('username') else url_for('guest_home_redirect') }}"
+                        class="{% if request.endpoint == 'home' %}active{% endif %}"
+                    >
+                        서비스 홈
+                    </a>
+
+                    <a
+                        href="{{ url_for('stations') }}"
+                        class="{% if request.endpoint in ('stations', 'station_detail') %}active{% endif %}"
+                    >
+                        대여소 조회
+                    </a>
+
+                    <a
+                        href="{{ url_for('pass_center', tab='purchase') }}"
+                        class="{% if request.endpoint in ('pass_center', 'create_pass_order', 'complete_qr_payment', 'cancel_qr_payment', 'qr_rental') %}active{% endif %}"
+                    >
+                        이용권 구매
+                    </a>
+
+                    <a
+                        href="{{ url_for('history') }}"
+                        class="{% if request.endpoint == 'history' %}active{% endif %}"
+                    >
+                        이용내역
+                    </a>
+
+                    <a
+                        href="{{ url_for('notices') }}"
+                        class="{% if request.endpoint in ('notices', 'notice_detail') %}active{% endif %}"
+                    >
+                        공지사항
+                    </a>
+
+                    <a
+                        href="{{ url_for('inquiries') }}"
+                        class="{% if request.endpoint in ('inquiries', 'inquiry_create', 'inquiry_detail', 'inquiry_edit') %}active{% endif %}"
+                    >
+                        문의사항
+                    </a>
+
+                    <a
+                        href="{{ url_for('usage_guide') }}"
+                        class="{% if request.endpoint == 'usage_guide' %}active{% endif %}"
+                    >
+                        이용안내
+                    </a>
+                </nav>
+            </div>
+        {% else %}
+            <div class="tt-header-right">
+                <div class="tt-header-account">
+                    <a
+                        href="{{ url_for('login') }}"
+                        class="{% if request.endpoint == 'login' %}current{% endif %}"
+                    >
+                        로그인
+                    </a>
+
+                    <a
+                        href="{{ url_for('signup') }}"
+                        class="{% if request.endpoint == 'signup' %}current{% endif %}"
+                    >
+                        회원가입
+                    </a>
+                </div>
+
+                <nav
+                    class="tt-header-nav"
+                    aria-label="비회원 서비스 메뉴"
+                >
+                    <a
+                        href="{{ url_for('guest_home_redirect') }}"
+                        class="{% if request.endpoint == 'home' %}active{% endif %}"
+                    >
+                        홈
+                    </a>
+
+                    <a
+                        href="{{ url_for('guest_stations_redirect') }}"
+                        class="{% if request.endpoint in ('stations', 'station_detail') %}active{% endif %}"
+                    >
+                        대여소 조회
+                    </a>
+
+                    <a
+                        href="{{ url_for('guest_qr_redirect') }}"
+                        class="{% if request.endpoint in ('pass_center', 'qr_rental') %}active{% endif %}"
+                    >
+                        이용권 구매
+                    </a>
+
+                    <a
+                        href="{{ url_for('notices') }}"
+                        class="{% if request.endpoint in ('notices', 'notice_detail') %}active{% endif %}"
+                    >
+                        공지사항
+                    </a>
+
+                    <a
+                        href="{{ url_for('usage_guide') }}"
+                        class="{% if request.endpoint == 'usage_guide' %}active{% endif %}"
+                    >
+                        이용안내
+                    </a>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div
+                    class="flash-wrap"
+                    id="flashWrap"
+                >
+                    {% for category, message in messages %}
+                        {#
+                            성공 알림 표시 정책
+
+                            1. 로그인 성공 알림은 표시하지 않음
+                            2. 비회원 시작·종료 알림은 표시하지 않음
+                            3. 로그아웃 알림은 2초 동안만 표시
+                            4. 오류·경고 알림은 기존대로 표시
+                        #}
+
+                        {% set is_login_success =
+                            category == "success"
+                            and "로그인" in message
+                            and "로그아웃" not in message
+                        %}
+
+                        {% set is_guest_notice =
+                            category == "success"
+                            and "비회원" in message
+                        %}
+
+                        {% set is_logout_notice =
+                            category == "success"
+                            and "로그아웃" in message
+                        %}
+
+                        {% if not is_login_success and not is_guest_notice %}
+                            <div
+                                class="flash flash-{{ category }}"
+                                role="alert"
+                                {% if is_logout_notice %}
+                                    data-auto-dismiss="2000"
+                                {% endif %}
+                            >
+                                <span class="flash-message">
+                                    {{ message }}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="flash-close"
+                                    aria-label="알림 닫기"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                const flashMessages = document.querySelectorAll(
+                    ".flash"
+                );
+
+                flashMessages.forEach(function (flashMessage) {
+                    registerFlashMessage(flashMessage);
+
+                    const autoDismissValue =
+                        flashMessage.dataset.autoDismiss;
+
+                    if (autoDismissValue) {
+                        const autoDismissDelay =
+                            Number(autoDismissValue);
+
+                        if (
+                            Number.isFinite(autoDismissDelay)
+                            && autoDismissDelay > 0
+                        ) {
+                            window.setTimeout(function () {
+                                if (
+                                    document.body.contains(
+                                        flashMessage
+                                    )
+                                ) {
+                                    flashMessage.classList.add(
+                                        "flash-hide"
+                                    );
+
+                                    window.setTimeout(function () {
+                                        flashMessage.remove();
+
+                                        const flashWrap =
+                                            document.querySelector(
+                                                ".flash-wrap"
+                                            );
+
+                                        if (
+                                            flashWrap
+                                            && !flashWrap.querySelector(
+                                                ".flash"
+                                            )
+                                        ) {
+                                            flashWrap.remove();
+                                        }
+                                    }, 250);
+                                }
+                            }, autoDismissDelay);
+                        }
+                    }
+                });
+            }
+        );
+
+        function registerFlashMessage(flashMessage) {
+            const closeButton = flashMessage.querySelector(
+                ".flash-close"
+            );
+
+            function removeFlashMessage() {
+                if (
+                    flashMessage.classList.contains(
+                        "flash-hide"
+                    )
+                ) {
+                    return;
+                }
+
+                flashMessage.classList.add(
+                    "flash-hide"
+                );
+
+                window.setTimeout(function () {
+                    flashMessage.remove();
+
+                    const flashWrap = document.querySelector(
+                        ".flash-wrap"
+                    );
+
+                    if (
+                        flashWrap &&
+                        flashWrap.querySelectorAll(
+                            ".flash"
+                        ).length === 0
+                    ) {
+                        flashWrap.remove();
+                    }
+                }, 400);
+            }
+
+            if (closeButton) {
+                closeButton.addEventListener(
+                    "click",
+                    removeFlashMessage
+                );
+            }
+
+            window.setTimeout(
+                removeFlashMessage,
+                3000
+            );
+        }
+
+        window.showClientNotice = function (
+            message,
+            category = "warning"
+        ) {
+            let flashWrap = document.querySelector(
+                ".flash-wrap"
+            );
+
+            if (!flashWrap) {
+                flashWrap = document.createElement(
+                    "div"
+                );
+
+                flashWrap.className = "flash-wrap";
+                flashWrap.id = "flashWrap";
+
+                document.body.appendChild(
+                    flashWrap
+                );
+            }
+
+            const flashMessage = document.createElement(
+                "div"
+            );
+
+            flashMessage.className = (
+                "flash flash-"
+                + category
+            );
+
+            flashMessage.setAttribute(
+                "role",
+                "alert"
+            );
+
+            const messageText = document.createElement(
+                "span"
+            );
+
+            messageText.className = "flash-message";
+            messageText.textContent = message;
+
+            const closeButton = document.createElement(
+                "button"
+            );
+
+            closeButton.type = "button";
+            closeButton.className = "flash-close";
+
+            closeButton.setAttribute(
+                "aria-label",
+                "알림 닫기"
+            );
+
+            closeButton.textContent = "×";
+
+            flashMessage.appendChild(
+                messageText
+            );
+
+            flashMessage.appendChild(
+                closeButton
+            );
+
+            flashWrap.appendChild(
+                flashMessage
+            );
+
+            registerFlashMessage(
+                flashMessage
+            );
+        };
+    </script>
+</body>
+</html>

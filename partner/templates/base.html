@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#071425">
+
+    <title>
+        {% block title %}또롱이 협력업체 포털{% endblock %}
+    </title>
+
+    <style>
+        html,
+        body {
+            min-height: 100%;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        .sidebar {
+            background: #071425;
+        }
+    </style>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='partner.css') }}"
+    >
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    {% if current_partner %}
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="sidebar-brand">
+                    <a
+                        href="{{ url_for('dashboard') }}"
+                        class="brand-link"
+                    >
+                        <div class="brand-mark">
+                            T
+                        </div>
+
+                        <div class="brand-copy">
+                            <strong>TTORONGI</strong>
+                            <span>PARTNER OPERATIONS</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="partner-summary">
+                    <div class="partner-summary-label">
+                        협력업체
+                    </div>
+
+                    <strong class="partner-summary-name">
+                        {{ current_partner.company_name }}
+                    </strong>
+
+                    <span class="partner-summary-code">
+                        {{ current_partner.company_code }}
+                    </span>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a
+                        href="{{ url_for('dashboard') }}"
+                        class="nav-link
+                        {% if request.endpoint == 'dashboard' %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-icon">▦</span>
+                        <span>대시보드</span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('tasks') }}"
+                        class="nav-link
+                        {% if request.endpoint in [
+                            'tasks',
+                            'task_detail',
+                            'accept_task',
+                            'start_task',
+                            'complete_task'
+                        ] %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-icon">☑</span>
+                        <span>배정 작업</span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('stations') }}"
+                        class="nav-link
+                        {% if request.endpoint == 'stations' %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-icon">⌂</span>
+                        <span>대여소 현황</span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('bicycles') }}"
+                        class="nav-link
+                        {% if request.endpoint == 'bicycles' %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-icon">◉</span>
+                        <span>자전거 현황</span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('history') }}"
+                        class="nav-link
+                        {% if request.endpoint == 'history' %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-icon">↺</span>
+                        <span>작업 내역</span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('company') }}"
+                        class="nav-link
+                        {% if request.endpoint == 'company' %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-icon">◇</span>
+                        <span>업체 정보</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="sidebar-user">
+                        <div class="sidebar-user-avatar">
+                            {{ current_partner.manager_name[0] }}
+                        </div>
+
+                        <div class="sidebar-user-copy">
+                            <strong>
+                                {{ current_partner.manager_name }}
+                            </strong>
+
+                            <span>현장 담당자</span>
+                        </div>
+                    </div>
+
+                    <form
+                        action="{{ url_for('logout') }}"
+                        method="post"
+                        data-full-navigation="true"
+                    >
+                        <input
+                            type="hidden"
+                            name="_csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="sidebar-logout-button"
+                        >
+                            로그아웃
+                        </button>
+                    </form>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <header class="top-header">
+                    <div class="top-header-left">
+                        <button
+                            type="button"
+                            class="mobile-menu-button"
+                            aria-label="메뉴 열기"
+                            onclick="document.body.classList.toggle('sidebar-open')"
+                        >
+                            ☰
+                        </button>
+
+                        <div>
+                            <div class="top-header-eyebrow">
+                                또롱이 공공자전거 통합운영기관
+                            </div>
+
+                            <div class="top-header-title">
+                                협력업체 업무 포털
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="top-header-right">
+                        <div class="system-status">
+                            <span class="status-dot"></span>
+                            운영 시스템 정상
+                        </div>
+
+                        <div class="header-user">
+                            <strong>
+                                {{ current_partner.manager_name }} 담당자
+                            </strong>
+
+                            <span>
+                                {{ current_partner.company_name }}
+                            </span>
+                        </div>
+                    </div>
+                </header>
+
+                <div
+                    id="partner-page-content"
+                    class="content-area"
+                >
+                    {% with messages = get_flashed_messages(
+                        with_categories=true
+                    ) %}
+                        {% if messages %}
+                            <div class="flash-stack">
+                                {% for category, message in messages %}
+                                    <div
+                                        class="flash-message flash-{{ category }}"
+                                    >
+                                        <span>{{ message }}</span>
+
+                                        <button
+                                            type="button"
+                                            class="flash-close"
+                                            onclick="this.parentElement.remove()"
+                                            aria-label="알림 닫기"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </div>
+
+                <footer class="main-footer">
+                    <span>
+                        © {{ current_year }} 또롱이 공공자전거 통합운영기관
+                    </span>
+
+                    <span>
+                        Partner Operations Portal · Port 7000
+                    </span>
+                </footer>
+            </main>
+        </div>
+    {% else %}
+        {% with messages = get_flashed_messages(
+            with_categories=true
+        ) %}
+            {% if messages %}
+                <div class="login-flash-container">
+                    {% for category, message in messages %}
+                        <div
+                            class="flash-message flash-{{ category }}"
+                        >
+                            <span>{{ message }}</span>
+
+                            <button
+                                type="button"
+                                class="flash-close"
+                                onclick="this.parentElement.remove()"
+                                aria-label="알림 닫기"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block guest_content %}{% endblock %}
+    {% endif %}
+
+    <div id="partner-page-scripts">
+        {% block scripts %}{% endblock %}
+    </div>
+
+    <script>
+        (() => {
+            "use strict";
+
+            let navigationController = null;
+            let navigationSequence = 0;
+
+
+            function initializeFlashMessages() {
+                document
+                    .querySelectorAll(".flash-message")
+                    .forEach(function (element) {
+                        if (element.dataset.timerStarted === "true") {
+                            return;
+                        }
+
+                        element.dataset.timerStarted = "true";
+
+                        window.setTimeout(function () {
+                            element.classList.add("flash-hide");
+
+                            window.setTimeout(function () {
+                                element.remove();
+                            }, 350);
+                        }, 4500);
+                    });
+            }
+
+
+            function executeScripts(container) {
+                if (!container) {
+                    return;
+                }
+
+                container
+                    .querySelectorAll("script")
+                    .forEach(function (oldScript) {
+                        const newScript =
+                            document.createElement("script");
+
+                        for (
+                            const attribute
+                            of oldScript.attributes
+                        ) {
+                            newScript.setAttribute(
+                                attribute.name,
+                                attribute.value
+                            );
+                        }
+
+                        newScript.textContent =
+                            oldScript.textContent;
+
+                        oldScript.replaceWith(newScript);
+                    });
+            }
+
+
+            function normalizeUrl(value) {
+                return new URL(
+                    value,
+                    window.location.origin
+                );
+            }
+
+
+            function isSameOriginUrl(value) {
+                try {
+                    return (
+                        normalizeUrl(value).origin
+                        === window.location.origin
+                    );
+                } catch (error) {
+                    return false;
+                }
+            }
+
+
+            function shouldHandleLink(link, event) {
+                if (!link) {
+                    return false;
+                }
+
+                if (
+                    event.defaultPrevented
+                    || event.button !== 0
+                    || event.ctrlKey
+                    || event.metaKey
+                    || event.shiftKey
+                    || event.altKey
+                ) {
+                    return false;
+                }
+
+                if (
+                    link.target
+                    && link.target !== "_self"
+                ) {
+                    return false;
+                }
+
+                if (
+                    link.hasAttribute("download")
+                    || link.dataset.fullNavigation === "true"
+                ) {
+                    return false;
+                }
+
+                if (!isSameOriginUrl(link.href)) {
+                    return false;
+                }
+
+                const url = normalizeUrl(link.href);
+
+                if (
+                    url.pathname.startsWith("/static/")
+                    || url.pathname === "/login"
+                    || url.pathname === "/logout"
+                ) {
+                    return false;
+                }
+
+                if (
+                    url.hash
+                    && url.pathname === window.location.pathname
+                    && url.search === window.location.search
+                ) {
+                    return false;
+                }
+
+                return Boolean(
+                    document.getElementById(
+                        "partner-page-content"
+                    )
+                );
+            }
+
+
+            function shouldHandleForm(form) {
+                if (!form) {
+                    return false;
+                }
+
+                if (
+                    form.dataset.fullNavigation === "true"
+                    || form.target
+                ) {
+                    return false;
+                }
+
+                const action =
+                    form.action || window.location.href;
+
+                if (!isSameOriginUrl(action)) {
+                    return false;
+                }
+
+                const url = normalizeUrl(action);
+
+                if (
+                    url.pathname === "/login"
+                    || url.pathname === "/logout"
+                ) {
+                    return false;
+                }
+
+                return Boolean(
+                    document.getElementById(
+                        "partner-page-content"
+                    )
+                );
+            }
+
+
+            function updateActiveNavigation(documentSource) {
+                const nextLinks =
+                    documentSource.querySelectorAll(
+                        ".sidebar-nav .nav-link"
+                    );
+
+                const currentLinks =
+                    document.querySelectorAll(
+                        ".sidebar-nav .nav-link"
+                    );
+
+                currentLinks.forEach(function (
+                    currentLink,
+                    index
+                ) {
+                    const nextLink = nextLinks[index];
+
+                    if (!nextLink) {
+                        return;
+                    }
+
+                    currentLink.classList.toggle(
+                        "active",
+                        nextLink.classList.contains("active")
+                    );
+                });
+            }
+
+
+            async function requestPage(
+                url,
+                fetchOptions,
+                historyMode
+            ) {
+                const content =
+                    document.getElementById(
+                        "partner-page-content"
+                    );
+
+                if (!content) {
+                    window.location.assign(url);
+                    return;
+                }
+
+                navigationSequence += 1;
+
+                const currentSequence =
+                    navigationSequence;
+
+                if (navigationController) {
+                    navigationController.abort();
+                }
+
+                navigationController =
+                    new AbortController();
+
+                document.body.classList.add(
+                    "partner-page-loading"
+                );
+
+                content.classList.remove(
+                    "partner-content-entering"
+                );
+
+                content.classList.add(
+                    "partner-content-leaving"
+                );
+
+                try {
+                    const response = await fetch(
+                        url,
+                        {
+                            ...fetchOptions,
+
+                            credentials: "same-origin",
+
+                            headers: {
+                                "X-Requested-With":
+                                    "XMLHttpRequest",
+
+                                ...(
+                                    fetchOptions.headers
+                                    || {}
+                                )
+                            },
+
+                            signal:
+                                navigationController.signal
+                        }
+                    );
+
+                    if (
+                        currentSequence
+                        !== navigationSequence
+                    ) {
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(
+                            `HTTP ${response.status}`
+                        );
+                    }
+
+                    const html =
+                        await response.text();
+
+                    if (
+                        currentSequence
+                        !== navigationSequence
+                    ) {
+                        return;
+                    }
+
+                    const nextDocument =
+                        new DOMParser().parseFromString(
+                            html,
+                            "text/html"
+                        );
+
+                    const nextContent =
+                        nextDocument.getElementById(
+                            "partner-page-content"
+                        );
+
+                    if (!nextContent) {
+                        window.location.assign(
+                            response.url || url
+                        );
+
+                        return;
+                    }
+
+                    const nextScripts =
+                        nextDocument.getElementById(
+                            "partner-page-scripts"
+                        );
+
+                    const currentScripts =
+                        document.getElementById(
+                            "partner-page-scripts"
+                        );
+
+                    content.innerHTML =
+                        nextContent.innerHTML;
+
+                    if (
+                        currentScripts
+                        && nextScripts
+                    ) {
+                        currentScripts.innerHTML =
+                            nextScripts.innerHTML;
+
+                        executeScripts(currentScripts);
+                    }
+
+                    document.title =
+                        nextDocument.title;
+
+                    updateActiveNavigation(
+                        nextDocument
+                    );
+
+                    const finalUrl =
+                        response.url || url;
+
+                    if (historyMode === "push") {
+                        window.history.pushState(
+                            {
+                                partnerNavigation: true
+                            },
+                            "",
+                            finalUrl
+                        );
+                    }
+
+                    if (historyMode === "replace") {
+                        window.history.replaceState(
+                            {
+                                partnerNavigation: true
+                            },
+                            "",
+                            finalUrl
+                        );
+                    }
+
+                    document.body.classList.remove(
+                        "sidebar-open"
+                    );
+
+                    window.scrollTo({
+                        top: 0,
+                        left: 0,
+                        behavior: "auto"
+                    });
+
+                    content.classList.remove(
+                        "partner-content-leaving"
+                    );
+
+                    content.classList.add(
+                        "partner-content-entering"
+                    );
+
+                    window.requestAnimationFrame(
+                        function () {
+                            window.requestAnimationFrame(
+                                function () {
+                                    content.classList.remove(
+                                        "partner-content-entering"
+                                    );
+                                }
+                            );
+                        }
+                    );
+
+                    initializeFlashMessages();
+
+                    document.dispatchEvent(
+                        new CustomEvent(
+                            "partner:page-loaded",
+                            {
+                                detail: {
+                                    url: finalUrl
+                                }
+                            }
+                        )
+                    );
+                } catch (error) {
+                    if (error.name === "AbortError") {
+                        return;
+                    }
+
+                    console.error(
+                        "페이지 전환 실패:",
+                        error
+                    );
+
+                    content.classList.remove(
+                        "partner-content-leaving"
+                    );
+
+                    window.location.assign(url);
+                } finally {
+                    if (
+                        currentSequence
+                        === navigationSequence
+                    ) {
+                        document.body.classList.remove(
+                            "partner-page-loading"
+                        );
+
+                        content.classList.remove(
+                            "partner-content-leaving"
+                        );
+                    }
+                }
+            }
+
+
+            document.addEventListener(
+                "click",
+                function (event) {
+                    const link =
+                        event.target.closest("a");
+
+                    if (
+                        !shouldHandleLink(
+                            link,
+                            event
+                        )
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    requestPage(
+                        link.href,
+                        {
+                            method: "GET"
+                        },
+                        "push"
+                    );
+                }
+            );
+
+
+            document.addEventListener(
+                "submit",
+                function (event) {
+                    const form = event.target;
+
+                    if (!shouldHandleForm(form)) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    const method =
+                        (
+                            form.method
+                            || "GET"
+                        ).toUpperCase();
+
+                    const action =
+                        form.action
+                        || window.location.href;
+
+                    const formData =
+                        new FormData(form);
+
+                    if (method === "GET") {
+                        const url =
+                            normalizeUrl(action);
+
+                        const params =
+                            new URLSearchParams();
+
+                        formData.forEach(function (
+                            value,
+                            key
+                        ) {
+                            params.append(
+                                key,
+                                String(value)
+                            );
+                        });
+
+                        url.search = params.toString();
+
+                        requestPage(
+                            url.href,
+                            {
+                                method: "GET"
+                            },
+                            "push"
+                        );
+
+                        return;
+                    }
+
+                    const submitButtons =
+                        form.querySelectorAll(
+                            "button[type='submit'], input[type='submit']"
+                        );
+
+                    submitButtons.forEach(function (
+                        button
+                    ) {
+                        button.disabled = true;
+                    });
+
+                    requestPage(
+                        action,
+                        {
+                            method: method,
+                            body: formData
+                        },
+                        "push"
+                    ).finally(function () {
+                        submitButtons.forEach(function (
+                            button
+                        ) {
+                            button.disabled = false;
+                        });
+                    });
+                }
+            );
+
+
+            window.addEventListener(
+                "popstate",
+                function () {
+                    requestPage(
+                        window.location.href,
+                        {
+                            method: "GET"
+                        },
+                        "none"
+                    );
+                }
+            );
+
+
+            initializeFlashMessages();
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}
+결제 완료 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="payment-result-page">
+    <div class="payment-result-container">
+        <div class="payment-success-icon">
+            ✓
+        </div>
+
+        <span class="eyebrow">
+            PAYMENT COMPLETE
+        </span>
+
+        <h1>
+            결제가 완료되었습니다.
+        </h1>
+
+        <p class="payment-result-description">
+            {{ order["product_name"] }}이 정상적으로 발급되었습니다.<br>
+            지금 바로 QR 자전거 대여를 시작할 수 있습니다.
+        </p>
+
+        <article class="payment-receipt">
+            <header>
+                <div>
+                    <span>TTORONGI RECEIPT</span>
+                    <h2>결제 영수증</h2>
+                </div>
+
+                <strong>결제 완료</strong>
+            </header>
+
+            <div class="receipt-product">
+                <span>🎫</span>
+
+                <div>
+                    <small>구매 이용권</small>
+                    <h3>{{ order["product_name"] }}</h3>
+
+                    <p>
+                        기본 {{ order["pass_minutes"] }}분 ·
+                        유효기간 {{ order["valid_days"] }}일
+                    </p>
+                </div>
+
+                <strong>
+                    {{ "{:,}".format(order["amount"]) }}원
+                </strong>
+            </div>
+
+            <dl class="receipt-information">
+                <div>
+                    <dt>주문번호</dt>
+                    <dd>{{ order["order_no"] }}</dd>
+                </div>
+
+                <div>
+                    <dt>결제수단</dt>
+
+                    <dd>
+                        {{
+                            payment_method_labels.get(
+                                order["payment_method"],
+                                order["payment_method"]
+                            )
+                        }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>결제일시</dt>
+                    <dd>{{ order["paid_at"] }}</dd>
+                </div>
+
+                <div>
+                    <dt>이용권 만료일</dt>
+                    <dd>{{ order["expires_at"] }}</dd>
+                </div>
+            </dl>
+
+            <div class="receipt-total">
+                <span>최종 결제금액</span>
+
+                <strong>
+                    {{ "{:,}".format(order["amount"]) }}원
+                </strong>
+            </div>
+        </article>
+
+        <div class="payment-result-actions">
+            <a
+                href="{{ url_for('pass_center', tab='rental') }}"
+                class="result-primary-button"
+            >
+                QR 대여 시작하기
+            </a>
+
+            <a
+                href="{{ url_for('pass_center', tab='payment') }}"
+                class="result-secondary-button"
+            >
+                결제내역 확인
+            </a>
+        </div>
+
+        {% if session.get("guest_mode") %}
+            <p class="guest-result-notice">
+                비회원 일일권은 현재 비회원 세션에서 사용할 수 있습니다.
+            </p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

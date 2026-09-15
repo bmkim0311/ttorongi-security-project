@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}
+내 정보 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="account-page">
+    <div class="account-container">
+        <div class="account-heading">
+            <span>MY ACCOUNT</span>
+            <h1>내 정보</h1>
+            <p>
+                회원 정보와 계정 설정을 확인할 수 있습니다.
+            </p>
+        </div>
+
+        <div class="account-profile-card">
+            <div class="account-avatar">
+                {{ account_user["name"][:1] }}
+            </div>
+
+            <div class="account-profile-copy">
+                <strong>
+                    {{ account_user["name"] }}님
+                </strong>
+
+                <span>
+                    {{ account_user["username"] }}
+                </span>
+            </div>
+        </div>
+
+        <dl class="account-information-list">
+            <div>
+                <dt>아이디</dt>
+                <dd>{{ account_user["username"] }}</dd>
+            </div>
+
+            <div>
+                <dt>닉네임</dt>
+                <dd>{{ account_user["name"] }}</dd>
+            </div>
+
+            <div>
+                <dt>이메일</dt>
+                <dd>{{ account_user["email"] }}</dd>
+            </div>
+
+            <div>
+                <dt>휴대전화</dt>
+                <dd>{{ account_user["phone"] }}</dd>
+            </div>
+
+            <div>
+                <dt>계정 유형</dt>
+                <dd>일반 회원</dd>
+            </div>
+
+            <div>
+                <dt>가입일</dt>
+                <dd>
+                    {{ account_user["created_at"] or "-" }}
+                </dd>
+            </div>
+        </dl>
+
+        <div class="account-action-grid">
+            <a href="{{ url_for('account_edit') }}">
+                <span>✏️</span>
+                <strong>개인정보 수정</strong>
+                <small>
+                    닉네임, 이메일, 휴대전화를 수정합니다.
+                </small>
+            </a>
+
+            <a href="{{ url_for('account_password') }}">
+                <span>🔐</span>
+                <strong>비밀번호 변경</strong>
+                <small>
+                    현재 비밀번호를 확인하고 변경합니다.
+                </small>
+            </a>
+
+            <a
+                href="{{ url_for('account_withdraw') }}"
+                class="account-danger-action"
+            >
+                <span>⚠️</span>
+                <strong>회원 탈퇴</strong>
+                <small>
+                    계정을 비활성화하고 서비스를 탈퇴합니다.
+                </small>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

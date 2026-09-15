@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}
+비회원 서비스 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="guest-page">
+    <div class="guest-container">
+        <section class="guest-hero">
+            <div>
+                <span class="guest-eyebrow">
+                    TTORONGI PUBLIC SERVICE
+                </span>
+
+                <h1>
+                    비회원님,<br>
+                    가까운 또롱이를 확인하세요.
+                </h1>
+
+                <p>
+                    회원가입 없이 대여소와
+                    이용 가능한 자전거를 조회할 수 있습니다.
+                </p>
+
+                <div class="guest-actions">
+                    <a
+                        href="{{ url_for('stations') }}"
+                        class="guest-primary-button"
+                    >
+                        대여소 조회
+                    </a>
+
+                    <a
+                        href="{{ url_for('login') }}"
+                        class="guest-secondary-button"
+                    >
+                        로그인
+                    </a>
+                </div>
+            </div>
+
+            <div class="guest-bike-icon">
+                🚲
+            </div>
+        </section>
+
+        <section class="guest-summary">
+            <article>
+                <span>
+                    운영 대여소
+                </span>
+
+                <strong>
+                    {{ station_count }}
+                </strong>
+
+                <small>
+                    개소
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    대여 가능 자전거
+                </span>
+
+                <strong>
+                    {{ available_count }}
+                </strong>
+
+                <small>
+                    대
+                </small>
+            </article>
+
+            <article>
+                <span>
+                    이용 상태
+                </span>
+
+                <strong class="guest-status">
+                    비회원
+                </strong>
+            </article>
+        </section>
+
+        <section class="guest-member-notice">
+            <div>
+                <strong>
+                    자전거를 직접 대여하시겠어요?
+                </strong>
+
+                <p>
+                    QR 대여와 개인 이용내역은
+                    로그인 후 사용할 수 있습니다.
+                </p>
+            </div>
+
+            <div>
+                <a href="{{ url_for('signup') }}">
+                    회원가입
+                </a>
+
+                <a href="{{ url_for('login') }}">
+                    로그인
+                </a>
+            </div>
+        </section>
+    </div>
+</section>
+{% endblock %}

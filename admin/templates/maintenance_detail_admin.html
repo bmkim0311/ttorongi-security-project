@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ task.task_code }} | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="detail-heading">
+    <div>
+        <a
+            href="{{ url_for('maintenance') }}"
+            class="back-link"
+        >
+            ← 정비 작업 목록
+        </a>
+
+        <span class="page-eyebrow">
+            MAINTENANCE DETAIL
+        </span>
+
+        <h1>{{ task.task_code }}</h1>
+
+        <p>
+            {{ task.issue_title }}
+        </p>
+    </div>
+
+    <div class="detail-heading-actions">
+        <span class="priority priority-{{ task.priority }}">
+            {{
+                task_priority_labels.get(
+                    task.priority,
+                    task.priority
+                )
+            }}
+        </span>
+
+        <span class="task-state task-state-{{ task.status }}">
+            {{
+                task_status_labels.get(
+                    task.status,
+                    task.status
+                )
+            }}
+        </span>
+    </div>
+</section>
+
+<section class="maintenance-progress">
+    {% set progress_states = [
+        ("assigned", "01", "작업 배정", task.assigned_at),
+        ("accepted", "02", "협력업체 접수", task.accepted_at),
+        ("in_progress", "03", "현장 작업", task.started_at),
+        ("completed", "04", "작업 완료", task.completed_at)
+    ] %}
+
+    {% set status_order = {
+        "assigned": 1,
+        "accepted": 2,
+        "in_progress": 3,
+        "completed": 4,
+        "cancelled": 0
+    } %}
+
+    {% for value, number, label, time in progress_states %}
+        <article class="{{
+            'complete'
+            if status_order.get(task.status, 0)
+               >= status_order.get(value, 0)
+            else ''
+        }}">
+            <span>{{ number }}</span>
+
+            <div>
+                <strong>{{ label }}</strong>
+                <small>{{ time or "대기 중" }}</small>
+            </div>
+        </article>
+
+        {% if not loop.last %}
+            <i></i>
+        {% endif %}
+    {% endfor %}
+</section>
+
+{% if task.status == "cancelled" %}
+    <section class="maintenance-cancelled-banner">
+        이 작업은 관리자 또는 운영 절차에 의해 취소되었습니다.
+    </section>
+{% endif %}
+
+<section class="detail-layout">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    TASK INFORMATION
+                </span>
+
+                <h2>작업 정보</h2>
+            </div>
+        </div>
+
+        <dl class="information-list">
+            <div>
+                <dt>작업 코드</dt>
+                <dd>{{ task.task_code }}</dd>
+            </div>
+
+            <div>
+                <dt>작업 제목</dt>
+                <dd>{{ task.issue_title }}</dd>
+            </div>
+
+            <div>
+                <dt>작업 유형</dt>
+
+                <dd>
+                    {{
+                        issue_type_labels.get(
+                            task.issue_type,
+                            task.issue_type
+                        )
+                    }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>우선순위</dt>
+
+                <dd>
+                    {{
+                        task_priority_labels.get(
+                            task.priority,
+                            task.priority
+                        )
+                    }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>현재 상태</dt>
+
+                <dd>
+                    {{
+                        task_status_labels.get(
+                            task.status,
+                            task.status
+                        )
+                    }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>배정 시각</dt>
+                <dd>{{ task.assigned_at or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>접수 시각</dt>
+                <dd>{{ task.accepted_at or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>작업 시작</dt>
+                <dd>{{ task.started_at or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>완료 시각</dt>
+                <dd>{{ task.completed_at or "-" }}</dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    PARTNER COMPANY
+                </span>
+
+                <h2>배정 협력업체</h2>
+            </div>
+        </div>
+
+        <div class="assigned-partner-card">
+            <span class="assigned-partner-mark">
+                P
+            </span>
+
+            <div>
+                <span>
+                    {{ task.company_code or "-" }}
+                </span>
+
+                <h3>
+                    {{ task.company_name or "미배정" }}
+                </h3>
+
+                <p>
+                    담당자 {{ task.manager_name or "-" }}
+                    ·
+                    {{ task.manager_phone or "-" }}
+                </p>
+            </div>
+        </div>
+
+        {% if task.status in [
+            "assigned",
+            "accepted"
+        ] %}
+            <form
+                action="{{ url_for(
+                    'maintenance_reassign',
+                    task_id=task.id
+                ) }}"
+                method="post"
+                class="maintenance-reassign-form"
+                onsubmit="return confirm(
+                    '이 작업의 협력업체를 재배정하시겠습니까?'
+                );"
+            >
+                <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <label>
+                    협력업체 재배정
+
+                    <select
+                        name="partner_id"
+                        required
+                    >
+                        {% for partner in partners %}
+                            <option
+                                value="{{ partner.id }}"
+                                {% if partner.id == task.partner_id %}
+                                    selected
+                                {% endif %}
+                                {% if partner.status != "active" %}
+                                    disabled
+                                {% endif %}
+                            >
+                                {{ partner.company_name }}
+                                ·
+                                {{ partner.manager_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <button
+                    type="submit"
+                    class="secondary-button"
+                >
+                    협력업체 변경
+                </button>
+            </form>
+        {% endif %}
+    </article>
+</section>
+
+<section class="detail-layout">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    STATION TARGET
+                </span>
+
+                <h2>대여소 대상</h2>
+            </div>
+
+            {% if task.station_id %}
+                <a
+                    href="{{ url_for(
+                        'station_detail_admin',
+                        station_id=task.station_id
+                    ) }}"
+                >
+                    대여소 상세
+                </a>
+            {% endif %}
+        </div>
+
+        {% if task.station_id %}
+            <dl class="information-list">
+                <div>
+                    <dt>대여소 코드</dt>
+                    <dd>{{ task.station_code }}</dd>
+                </div>
+
+                <div>
+                    <dt>대여소명</dt>
+                    <dd>{{ task.station_name }}</dd>
+                </div>
+
+                <div>
+                    <dt>주소</dt>
+                    <dd>{{ task.station_address }}</dd>
+                </div>
+
+                <div>
+                    <dt>운영 상태</dt>
+                    <dd>{{ task.station_status }}</dd>
+                </div>
+            </dl>
+        {% else %}
+            <div class="empty-block">
+                지정된 대여소가 없습니다.
+            </div>
+        {% endif %}
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    BICYCLE TARGET
+                </span>
+
+                <h2>자전거 대상</h2>
+            </div>
+
+            {% if task.bicycle_id %}
+                <a
+                    href="{{ url_for(
+                        'bicycle_detail_admin',
+                        bicycle_id=task.bicycle_id
+                    ) }}"
+                >
+                    자전거 상세
+                </a>
+            {% endif %}
+        </div>
+
+        {% if task.bicycle_id %}
+            <dl class="information-list">
+                <div>
+                    <dt>자전거 코드</dt>
+                    <dd>{{ task.bicycle_code }}</dd>
+                </div>
+
+                <div>
+                    <dt>QR 코드</dt>
+                    <dd>{{ task.qr_code }}</dd>
+                </div>
+
+                <div>
+                    <dt>현재 상태</dt>
+                    <dd>{{ task.bicycle_status }}</dd>
+                </div>
+
+                <div>
+                    <dt>배터리</dt>
+                    <dd>{{ task.battery_level }}%</dd>
+                </div>
+            </dl>
+        {% else %}
+            <div class="empty-block">
+                지정된 자전거가 없습니다.
+            </div>
+        {% endif %}
+    </article>
+</section>
+
+{% if task.status in [
+    "assigned",
+    "accepted"
+] %}
+    <section class="panel maintenance-cancel-panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    TASK CANCELLATION
+                </span>
+
+                <h2>작업 취소</h2>
+            </div>
+        </div>
+
+        <div class="force-return-warning">
+            <strong>
+                배정 또는 접수 상태의 작업만 취소할 수 있습니다.
+            </strong>
+
+            <p>
+                작업이 시작된 후에는 협력업체 진행 상태를 보존하기 위해
+                관리자 화면에서 취소할 수 없습니다.
+            </p>
+        </div>
+
+        <form
+            action="{{ url_for(
+                'maintenance_cancel',
+                task_id=task.id
+            ) }}"
+            method="post"
+            class="maintenance-cancel-form"
+            onsubmit="return confirm(
+                '이 정비 작업을 취소하시겠습니까?'
+            );"
+        >
+            <input
+                type="hidden"
+                name="_csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <label class="admin-form-field">
+                <span>
+                    작업 취소 사유
+                    <em>필수</em>
+                </span>
+
+                <textarea
+                    name="reason"
+                    maxlength="500"
+                    placeholder="예: 중복 배정 확인으로 작업 취소"
+                    required
+                ></textarea>
+            </label>
+
+            <button
+                type="submit"
+                class="danger-solid-button"
+            >
+                정비 작업 취소
+            </button>
+        </form>
+    </section>
+{% endif %}
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                RELATED TASKS
+            </span>
+
+            <h2>연관 정비 작업</h2>
+        </div>
+    </div>
+
+    <div class="compact-history-list">
+        {% for related in related_tasks %}
+            <a
+                href="{{ url_for(
+                    'maintenance_detail_admin',
+                    task_id=related.id
+                ) }}"
+            >
+                <span>
+                    <strong>
+                        {{ related.task_code }}
+                        ·
+                        {{ related.issue_title }}
+                    </strong>
+
+                    <small>
+                        {{ related.company_name or "미배정" }}
+                        ·
+                        {{ related.assigned_at }}
+                    </small>
+                </span>
+
+                <span class="task-state task-state-{{ related.status }}">
+                    {{
+                        task_status_labels.get(
+                            related.status,
+                            related.status
+                        )
+                    }}
+                </span>
+            </a>
+        {% else %}
+            <div class="empty-block">
+                같은 대여소 또는 자전거의 연관 작업이 없습니다.
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

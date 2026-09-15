@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ inquiry.title }} | 문의사항
+{% endblock %}
+
+{% block content %}
+<section class="tt-inquiry-detail-page">
+    <div class="tt-inquiry-detail-heading">
+        <a href="{{ url_for('inquiries') }}">
+            ← 내 문의 목록
+        </a>
+
+        <span class="tt-inquiry-status tt-inquiry-status-{{ inquiry.status }}">
+            {{
+                status_labels.get(
+                    inquiry.status,
+                    inquiry.status
+                )
+            }}
+        </span>
+
+        <h1>{{ inquiry.title }}</h1>
+
+        <div class="tt-inquiry-detail-meta">
+            <span>
+                {{
+                    category_labels.get(
+                        inquiry.category,
+                        "기타"
+                    )
+                }}
+            </span>
+
+            <time>
+                {{
+                    inquiry.created_at
+                    .strftime("%Y.%m.%d %H:%M")
+                }}
+            </time>
+        </div>
+    </div>
+
+    <article class="tt-inquiry-question">
+        {% for paragraph in inquiry.content.split('\n') %}
+            {% if paragraph | trim %}
+                <p>{{ paragraph | trim }}</p>
+            {% endif %}
+        {% endfor %}
+    </article>
+
+    <section class="tt-inquiry-answer-area">
+        <h2>관리자 답변</h2>
+
+        {% for answer in answers %}
+            <article class="tt-inquiry-answer">
+                <div>
+                    <strong>
+                        {{ answer.admin_name or "통합운영 관리자" }}
+                    </strong>
+
+                    <time>
+                        {{
+                            answer.created_at
+                            .strftime("%Y.%m.%d %H:%M")
+                        }}
+                    </time>
+                </div>
+
+                {% for paragraph in answer.answer_content.split('\n') %}
+                    {% if paragraph | trim %}
+                        <p>{{ paragraph | trim }}</p>
+                    {% endif %}
+                {% endfor %}
+            </article>
+        {% else %}
+            <div class="tt-inquiry-answer-empty">
+                <strong>
+                    아직 등록된 답변이 없습니다.
+                </strong>
+
+                <p>
+                    담당자가 문의를 확인한 후 답변을 등록합니다.
+                </p>
+            </div>
+        {% endfor %}
+    </section>
+
+    <div class="tt-inquiry-detail-actions">
+        {% if inquiry.status == "submitted" %}
+            <a
+                href="{{ url_for(
+                    'inquiry_edit',
+                    inquiry_id=inquiry.id
+                ) }}"
+            >
+                문의 수정
+            </a>
+
+            <form
+                action="{{ url_for(
+                    'inquiry_cancel',
+                    inquiry_id=inquiry.id
+                ) }}"
+                method="post"
+                onsubmit="return confirm('이 문의를 취소하시겠습니까?');"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ inquiry_csrf_token() }}"
+                >
+
+                <button type="submit">
+                    문의 취소
+                </button>
+            </form>
+        {% endif %}
+
+        <a href="{{ url_for('inquiries') }}">
+            목록으로
+        </a>
+    </div>
+</section>
+{% endblock %}

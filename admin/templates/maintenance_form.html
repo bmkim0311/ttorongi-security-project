@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}
+    정비 작업 배정 | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="detail-heading">
+    <div>
+        <a
+            href="{{ url_for('maintenance') }}"
+            class="back-link"
+        >
+            ← 정비 작업 목록
+        </a>
+
+        <span class="page-eyebrow">
+            TASK ASSIGNMENT
+        </span>
+
+        <h1>새 정비 작업 배정</h1>
+
+        <p>
+            작업 대상과 협력업체를 선택해 현장 정비 작업을 배정합니다.
+        </p>
+    </div>
+</section>
+
+<form
+    action="{{ url_for('maintenance_create') }}"
+    method="post"
+    class="maintenance-form-layout"
+>
+    <input
+        type="hidden"
+        name="_csrf_token"
+        value="{{ csrf_token() }}"
+    >
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    ASSIGNMENT TARGET
+                </span>
+
+                <h2>작업 대상·협력업체</h2>
+            </div>
+        </div>
+
+        <div class="admin-form-grid">
+            <label class="admin-form-field">
+                <span>
+                    협력업체
+                    <em>필수</em>
+                </span>
+
+                <select
+                    name="partner_id"
+                    required
+                >
+                    <option value="">
+                        협력업체 선택
+                    </option>
+
+                    {% for partner in partners %}
+                        <option
+                            value="{{ partner.id }}"
+                            {% if form_data.partner_id|string == partner.id|string %}
+                                selected
+                            {% endif %}
+                            {% if partner.status != "active" %}
+                                disabled
+                            {% endif %}
+                        >
+                            {{ partner.company_name }}
+                            ·
+                            {{ partner.manager_name }}
+                            ·
+                            {{
+                                "활성"
+                                if partner.status == "active"
+                                else "비활성"
+                            }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="admin-form-field">
+                <span>
+                    대여소
+                </span>
+
+                <select
+                    id="maintenance_station_id"
+                    name="station_id"
+                >
+                    <option value="">
+                        대여소 미지정
+                    </option>
+
+                    {% for station in stations %}
+                        <option
+                            value="{{ station.id }}"
+                            {% if form_data.station_id|string == station.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ station.station_name }}
+                            ·
+                            {{ station.station_code }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="admin-form-field admin-form-field-full">
+                <span>
+                    자전거
+                </span>
+
+                <select
+                    id="maintenance_bicycle_id"
+                    name="bicycle_id"
+                >
+                    <option value="">
+                        자전거 미지정
+                    </option>
+
+                    {% for bicycle in bicycles %}
+                        <option
+                            value="{{ bicycle.id }}"
+                            data-station-id="{{ bicycle.station_id or '' }}"
+                            {% if form_data.bicycle_id|string == bicycle.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ bicycle.bicycle_code }}
+                            ·
+                            {{ bicycle.station_name or "미배치" }}
+                            ·
+                            상태 {{ bicycle.status }}
+                            ·
+                            배터리 {{ bicycle.battery_level }}%
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <small>
+                    자전거를 선택하면 현재 배치 대여소가 자동으로 선택됩니다.
+                </small>
+            </label>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    TASK INFORMATION
+                </span>
+
+                <h2>작업 내용</h2>
+            </div>
+        </div>
+
+        <div class="admin-form-grid">
+            <label class="admin-form-field">
+                <span>
+                    작업 유형
+                    <em>필수</em>
+                </span>
+
+                <select
+                    name="issue_type"
+                    required
+                >
+                    <option value="">
+                        작업 유형 선택
+                    </option>
+
+                    {% for value, label in issue_type_labels.items() %}
+                        <option
+                            value="{{ value }}"
+                            {% if form_data.issue_type == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="admin-form-field">
+                <span>
+                    우선순위
+                    <em>필수</em>
+                </span>
+
+                <select
+                    name="priority"
+                    required
+                >
+                    {% for value, label in task_priority_labels.items() %}
+                        <option
+                            value="{{ value }}"
+                            {% if form_data.priority == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label class="admin-form-field admin-form-field-full">
+                <span>
+                    작업 제목
+                    <em>필수</em>
+                </span>
+
+                <input
+                    type="text"
+                    name="issue_title"
+                    value="{{ form_data.issue_title or '' }}"
+                    placeholder="예: 뒷바퀴 잠금장치 작동 불량 점검"
+                    maxlength="200"
+                    required
+                >
+            </label>
+
+            <label class="admin-form-field admin-form-field-full">
+                <span>
+                    상세 요청 사항
+                </span>
+
+                <textarea
+                    name="issue_description"
+                    maxlength="2000"
+                    placeholder="현장 증상, 확인 사항, 조치 요청 내용을 입력하세요."
+                >{{ form_data.issue_description or '' }}</textarea>
+            </label>
+        </div>
+    </section>
+
+    <section class="maintenance-priority-guide">
+        <article>
+            <span class="priority priority-normal">
+                일반
+            </span>
+
+            <p>
+                정기 점검이나 일반적인 현장 관리 작업입니다.
+            </p>
+        </article>
+
+        <article>
+            <span class="priority priority-high">
+                높음
+            </span>
+
+            <p>
+                빠른 현장 확인과 조치가 필요한 작업입니다.
+            </p>
+        </article>
+
+        <article>
+            <span class="priority priority-urgent">
+                긴급
+            </span>
+
+            <p>
+                안전이나 서비스 운영에 즉시 영향을 줄 수 있는 작업입니다.
+            </p>
+        </article>
+    </section>
+
+    <div class="form-action-bar">
+        <a
+            href="{{ url_for('maintenance') }}"
+            class="secondary-button"
+        >
+            취소
+        </a>
+
+        <button
+            type="submit"
+            class="primary-button"
+        >
+            협력업체에 작업 배정
+        </button>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const bicycleSelect =
+            document.getElementById(
+                "maintenance_bicycle_id"
+            );
+
+        const stationSelect =
+            document.getElementById(
+                "maintenance_station_id"
+            );
+
+        if (!bicycleSelect || !stationSelect) {
+            return;
+        }
+
+        bicycleSelect.addEventListener(
+            "change",
+            function () {
+                const option =
+                    bicycleSelect.options[
+                        bicycleSelect.selectedIndex
+                    ];
+
+                const stationId =
+                    option.dataset.stationId;
+
+                if (stationId) {
+                    stationSelect.value =
+                        stationId;
+                }
+            }
+        );
+    })();
+</script>
+{% endblock %}

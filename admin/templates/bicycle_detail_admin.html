@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ bicycle.bicycle_code }} | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="detail-heading">
+    <div>
+        <a
+            href="{{ url_for('bicycles') }}"
+            class="back-link"
+        >
+            ← 자전거 목록
+        </a>
+
+        <span class="page-eyebrow">
+            BICYCLE DETAIL
+        </span>
+
+        <h1>{{ bicycle.bicycle_code }}</h1>
+
+        <p>
+            QR {{ bicycle.qr_code }}
+            ·
+            {{ bicycle.station_name or "미배치 자전거" }}
+        </p>
+    </div>
+
+    <div class="detail-heading-actions">
+        <span class="bicycle-state bicycle-state-{{ bicycle.status }}">
+            {{
+                bicycle_status_labels.get(
+                    bicycle.status,
+                    bicycle.status
+                )
+            }}
+        </span>
+
+        <a
+            href="{{ url_for(
+                'bicycle_edit',
+                bicycle_id=bicycle.id
+            ) }}"
+            class="secondary-button"
+        >
+            자전거 정보 수정
+        </a>
+    </div>
+</section>
+
+<section class="detail-summary-grid">
+    <article>
+        <span>누적 대여</span>
+
+        <strong>
+            {{ rental_summary.rental_count or 0 }}
+            <small>건</small>
+        </strong>
+    </article>
+
+    <article>
+        <span>총 이용 시간</span>
+
+        <strong>
+            {{ rental_summary.total_usage_minutes or 0 }}
+            <small>분</small>
+        </strong>
+    </article>
+
+    <article>
+        <span>누적 이용 금액</span>
+
+        <strong>
+            {{ "{:,}".format(rental_summary.total_fee or 0) }}
+            <small>원</small>
+        </strong>
+    </article>
+
+    <article>
+        <span>현재 배터리</span>
+
+        <strong>
+            {{ bicycle.battery_level }}
+            <small>%</small>
+        </strong>
+    </article>
+</section>
+
+<section class="detail-layout">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    BICYCLE INFORMATION
+                </span>
+
+                <h2>자전거 정보</h2>
+            </div>
+        </div>
+
+        <dl class="information-list">
+            <div>
+                <dt>관리 번호</dt>
+                <dd>{{ bicycle.id }}</dd>
+            </div>
+
+            <div>
+                <dt>자전거 코드</dt>
+                <dd>{{ bicycle.bicycle_code }}</dd>
+            </div>
+
+            <div>
+                <dt>QR 코드</dt>
+                <dd>{{ bicycle.qr_code }}</dd>
+            </div>
+
+            <div>
+                <dt>배치 대여소</dt>
+
+                <dd>
+                    {% if bicycle.station_name %}
+                        {{ bicycle.station_name }}
+                        ·
+                        {{ bicycle.station_code }}
+                    {% else %}
+                        미배치
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div>
+                <dt>자전거 상태</dt>
+
+                <dd>
+                    {{
+                        bicycle_status_labels.get(
+                            bicycle.status,
+                            bicycle.status
+                        )
+                    }}
+                </dd>
+            </div>
+
+            <div>
+                <dt>배터리</dt>
+                <dd>{{ bicycle.battery_level }}%</dd>
+            </div>
+
+            <div>
+                <dt>최근 점검</dt>
+                <dd>{{ bicycle.last_checked_at or "-" }}</dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    CURRENT RENTAL
+                </span>
+
+                <h2>현재 이용 상태</h2>
+            </div>
+        </div>
+
+        {% if active_rental %}
+            <div class="current-rental-card bicycle-rental-card">
+                <span class="live-rental">
+                    현재 대여 중
+                </span>
+
+                <h3>
+                    {{ active_rental.user_name or "이름 없음" }}
+                </h3>
+
+                <p class="rental-user-id">
+                    {{ active_rental.username }}
+                </p>
+
+                <dl>
+                    <div>
+                        <dt>대여 번호</dt>
+                        <dd>#{{ active_rental.id }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>출발 대여소</dt>
+
+                        <dd>
+                            {{ active_rental.departure_station_name or "-" }}
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt>대여 시각</dt>
+                        <dd>{{ active_rental.rental_time }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>연락처</dt>
+                        <dd>{{ active_rental.user_phone or "-" }}</dd>
+                    </div>
+                </dl>
+            </div>
+        {% else %}
+            <div class="empty-block">
+                현재 이 자전거를 이용 중인 사용자가 없습니다.
+            </div>
+        {% endif %}
+    </article>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                RENTAL HISTORY
+            </span>
+
+            <h2>최근 대여 내역</h2>
+        </div>
+
+        <span class="result-count">
+            최근 {{ recent_rentals|length }}건
+        </span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th>대여 번호</th>
+                    <th>이용자</th>
+                    <th>출발 대여소</th>
+                    <th>반납 대여소</th>
+                    <th>대여 시각</th>
+                    <th>이용 시간</th>
+                    <th>요금</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for rental in recent_rentals %}
+                    <tr>
+                        <td>#{{ rental.id }}</td>
+
+                        <td>
+                            <strong>
+                                {{ rental.user_name or "비회원" }}
+                            </strong>
+
+                            <small>
+                                {{ rental.username or "-" }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {{ rental.departure_station_name or "-" }}
+                        </td>
+
+                        <td>
+                            {{ rental.return_station_name or "-" }}
+                        </td>
+
+                        <td>
+                            {{ rental.rental_time }}
+                        </td>
+
+                        <td>
+                            {{ rental.usage_minutes or 0 }}분
+                        </td>
+
+                        <td>
+                            {{ "{:,}".format(rental.fee or 0) }}원
+                        </td>
+
+                        <td>
+                            <span class="status-badge status-{{ rental.status }}">
+                                {{
+                                    {
+                                        "renting": "대여 중",
+                                        "returned": "반납 완료",
+                                        "cancelled": "취소"
+                                    }.get(
+                                        rental.status,
+                                        rental.status
+                                    )
+                                }}
+                            </span>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td
+                            colspan="8"
+                            class="empty-cell"
+                        >
+                            이 자전거의 대여 내역이 없습니다.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                MAINTENANCE HISTORY
+            </span>
+
+            <h2>정비 작업 내역</h2>
+        </div>
+
+        <span class="result-count">
+            최근 {{ tasks|length }}건
+        </span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th>작업 코드</th>
+                    <th>작업명</th>
+                    <th>협력업체</th>
+                    <th>우선순위</th>
+                    <th>상태</th>
+                    <th>배정 시각</th>
+                    <th>완료 시각</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {{ task.task_code }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ task.issue_title }}
+                        </td>
+
+                        <td>
+                            {{ task.company_name or "미지정" }}
+                        </td>
+
+                        <td>
+                            <span class="priority priority-{{ task.priority }}">
+                                {{
+                                    task_priority_labels.get(
+                                        task.priority,
+                                        task.priority
+                                    )
+                                }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="task-state task-state-{{ task.status }}">
+                                {{
+                                    task_status_labels.get(
+                                        task.status,
+                                        task.status
+                                    )
+                                }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ task.assigned_at }}
+                        </td>
+
+                        <td>
+                            {{ task.completed_at or "-" }}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td
+                            colspan="7"
+                            class="empty-cell"
+                        >
+                            이 자전거에 등록된 정비 작업이 없습니다.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}
+    운영 이벤트 상세 | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="detail-heading">
+    <div>
+        <a
+            href="{{ url_for('logs') }}"
+            class="back-link"
+        >
+            ← 운영 로그
+        </a>
+
+        <span class="page-eyebrow">
+            OPERATION EVENT DETAIL
+        </span>
+
+        <h1>{{ log.event_name }}</h1>
+
+        <p>
+            {{ log.created_at }}
+            ·
+            {{ log.source_table }}
+        </p>
+    </div>
+
+    <div class="detail-heading-actions">
+        <span class="operation-severity operation-severity-{{ log.severity }}">
+            <i></i>
+
+            {{
+                severity_labels.get(
+                    log.severity,
+                    log.severity
+                )
+            }}
+        </span>
+
+        <span class="operation-service operation-service-{{ log.service_type }}">
+            {% if log.service_type == "user" %}
+                사용자 서비스
+            {% elif log.service_type == "partner" %}
+                협력업체
+            {% elif log.service_type == "security" %}
+                보안 이벤트
+            {% elif log.service_type == "admin" %}
+                관리자 조치
+            {% endif %}
+        </span>
+    </div>
+</section>
+
+<section class="detail-layout">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    EVENT INFORMATION
+                </span>
+
+                <h2>이벤트 정보</h2>
+            </div>
+        </div>
+
+        <dl class="information-list">
+            <div>
+                <dt>이벤트</dt>
+                <dd>{{ log.event_name }}</dd>
+            </div>
+
+            <div>
+                <dt>처리 결과</dt>
+                <dd>{{ log.result }}</dd>
+            </div>
+
+            <div>
+                <dt>심각도</dt>
+                <dd>{{ log.severity }}</dd>
+            </div>
+
+            <div>
+                <dt>발생 시각</dt>
+                <dd>{{ log.created_at }}</dd>
+            </div>
+
+            <div>
+                <dt>원본 테이블</dt>
+                <dd>{{ log.source_table }}</dd>
+            </div>
+
+            <div>
+                <dt>원본 ID</dt>
+                <dd>{{ log.source_id }}</dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    ACTOR AND TARGET
+                </span>
+
+                <h2>계정·대상 정보</h2>
+            </div>
+        </div>
+
+        <dl class="information-list">
+            <div>
+                <dt>계정·업체</dt>
+                <dd>{{ log.actor_name or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>식별 ID</dt>
+                <dd>{{ log.actor_id or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>접속 IP</dt>
+                <dd>{{ log.ip_address or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>대상 유형</dt>
+                <dd>{{ log.target_type or "-" }}</dd>
+            </div>
+
+            <div>
+                <dt>대상 ID</dt>
+                <dd>{{ log.target_id or "-" }}</dd>
+            </div>
+        </dl>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                DESCRIPTION
+            </span>
+
+            <h2>이벤트 내용</h2>
+        </div>
+    </div>
+
+    <div class="log-value-block">
+        {{ log.description or "상세 설명이 없습니다." }}
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                EVENT DATA
+            </span>
+
+            <h2>상세 데이터</h2>
+        </div>
+    </div>
+
+    {% if log.formatted_detail %}
+        <pre class="log-json-block">{{ log.formatted_detail }}</pre>
+    {% else %}
+        <div class="empty-block">
+            별도의 상세 데이터가 없습니다.
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

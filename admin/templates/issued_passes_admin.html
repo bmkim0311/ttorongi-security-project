@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}
+    발급 이용권 | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <a
+            href="{{ url_for('payments_admin') }}"
+            class="back-link"
+        >
+            ← 결제 주문 관리
+        </a>
+
+        <span class="page-eyebrow">
+            ISSUED PASS CONTROL
+        </span>
+
+        <h1>발급 이용권</h1>
+
+        <p>
+            결제 완료 후 발급된 이용권과
+            실제 대여 사용 여부를 확인합니다.
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('pass_products_admin') }}"
+        class="secondary-button"
+    >
+        이용권 상품
+    </a>
+</section>
+
+<section class="panel filter-panel">
+    <form
+        method="get"
+        action="{{ url_for('issued_passes_admin') }}"
+        class="management-filter issued-pass-filter"
+    >
+        <label>
+            <span>이용권 상태</span>
+
+            <select name="status">
+                <option value="all">
+                    전체
+                </option>
+
+                {% for value, label in pass_status_labels.items() %}
+                    <option
+                        value="{{ value }}"
+                        {% if selected_status == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <button
+            type="submit"
+            class="primary-button"
+        >
+            조회
+        </button>
+
+        <a
+            href="{{ url_for('issued_passes_admin') }}"
+            class="secondary-button"
+        >
+            초기화
+        </a>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                ISSUED PASS LIST
+            </span>
+
+            <h2>이용권 발급 내역</h2>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table class="management-table issued-pass-table">
+            <thead>
+                <tr>
+                    <th>이용권 번호</th>
+                    <th>이용자</th>
+                    <th>상품</th>
+                    <th>상태</th>
+                    <th>사용 가능기간</th>
+                    <th>남은 사용</th>
+                    <th>연결 주문</th>
+                    <th>대여 연결</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in passes %}
+                    <tr>
+                        <td>
+                            <strong>#{{ item.id }}</strong>
+                        </td>
+
+                        <td>
+                            <span
+                                class="
+                                    customer-type-badge
+                                    customer-{{ item.customer_type }}
+                                "
+                            >
+                                {{
+                                    "비회원"
+                                    if item.customer_type == "guest"
+                                    else "회원"
+                                }}
+                            </span>
+
+                            <strong>
+                                {{ item.user_name or "비회원" }}
+                            </strong>
+
+                            <small>
+                                {{ item.username or "-" }}
+                            </small>
+                        </td>
+
+                        <td>
+                            <strong>{{ item.product_name }}</strong>
+                            <small>{{ item.product_code }}</small>
+                        </td>
+
+                        <td>
+                            <span
+                                class="
+                                    pass-state
+                                    pass-state-{{ item.status }}
+                                "
+                            >
+                                {{
+                                    pass_status_labels.get(
+                                        item.status,
+                                        item.status
+                                    )
+                                }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong>{{ item.valid_from }}</strong>
+                            <small>~ {{ item.expires_at }}</small>
+                        </td>
+
+                        <td>
+                            {% if item.is_unlimited %}
+                                무제한
+                            {% else %}
+                                {{ item.remaining_uses or 0 }}회
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.order_id %}
+                                <a
+                                    href="{{ url_for(
+                                        'payment_detail_admin',
+                                        order_id=item.order_id
+                                    ) }}"
+                                    class="table-detail-link"
+                                >
+                                    {{ item.order_no }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.rental_id %}
+                                <a
+                                    href="{{ url_for(
+                                        'rental_detail_admin',
+                                        rental_id=item.rental_id
+                                    ) }}"
+                                    class="linked-rental-badge"
+                                >
+                                    {{ item.bicycle_code or "대여 상세" }}
+                                </a>
+                            {% else %}
+                                <span class="muted-text">
+                                    미사용
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td
+                            colspan="8"
+                            class="empty-cell"
+                        >
+                            발급 이용권 내역이 없습니다.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

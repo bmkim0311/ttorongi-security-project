@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}
+    문의사항 | 또롱이 공공자전거
+{% endblock %}
+
+{% block content %}
+<section class="tt-inquiry-page">
+    <div class="tt-inquiry-heading">
+        <div>
+            <span>고객 지원</span>
+
+            <h1>문의사항</h1>
+
+            <p>
+                또롱이 서비스 이용 중 발생한 불편 사항을
+                문의하고 답변을 확인할 수 있습니다.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('inquiry_create') }}"
+            class="tt-inquiry-create-link"
+        >
+            문의 작성
+        </a>
+    </div>
+
+    <section class="tt-inquiry-summary">
+        <div>
+            <span>전체 문의</span>
+
+            <strong>
+                {{ summary.total_count or 0 }}
+            </strong>
+        </div>
+
+        <div>
+            <span>접수</span>
+
+            <strong>
+                {{ summary.submitted_count or 0 }}
+            </strong>
+        </div>
+
+        <div>
+            <span>확인 중</span>
+
+            <strong>
+                {{ summary.in_progress_count or 0 }}
+            </strong>
+        </div>
+
+        <div>
+            <span>답변 완료</span>
+
+            <strong>
+                {{ summary.answered_count or 0 }}
+            </strong>
+        </div>
+    </section>
+
+    <form
+        action="{{ url_for('inquiries') }}"
+        method="get"
+        class="tt-inquiry-filter"
+    >
+        <select name="status">
+            {% for value, label in status_labels.items() %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="category">
+            {% for value, label in category_labels.items() %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_category == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input
+            type="search"
+            name="keyword"
+            value="{{ keyword }}"
+            placeholder="문의 제목 또는 내용 검색"
+        >
+
+        <button type="submit">
+            검색
+        </button>
+
+        <a href="{{ url_for('inquiries') }}">
+            초기화
+        </a>
+    </form>
+
+    <div class="tt-inquiry-result">
+        <span>
+            전체 {{ total_count }}건
+        </span>
+
+        {% if total_count %}
+            <span>
+                {{ first_item }}–{{ last_item }}번째 표시
+            </span>
+        {% endif %}
+    </div>
+
+    <section class="tt-inquiry-list">
+        <div class="tt-inquiry-list-head">
+            <span>상태</span>
+            <span>분류</span>
+            <span>제목</span>
+            <span>작성일</span>
+        </div>
+
+        {% for inquiry in inquiries %}
+            <article class="tt-inquiry-row">
+                <div>
+                    <span class="tt-inquiry-status tt-inquiry-status-{{ inquiry.status }}">
+                        {{
+                            status_labels.get(
+                                inquiry.status,
+                                inquiry.status
+                            )
+                        }}
+                    </span>
+                </div>
+
+                <div>
+                    <span class="tt-inquiry-category">
+                        {{
+                            category_labels.get(
+                                inquiry.category,
+                                "기타"
+                            )
+                        }}
+                    </span>
+                </div>
+
+                <div class="tt-inquiry-title">
+                    <a
+                        href="{{ url_for(
+                            'inquiry_detail',
+                            inquiry_id=inquiry.id
+                        ) }}"
+                    >
+                        {{ inquiry.title }}
+                    </a>
+
+                    {% if inquiry.answer_count %}
+                        <small>
+                            답변 등록
+                        </small>
+                    {% endif %}
+                </div>
+
+                <time>
+                    {{
+                        inquiry.created_at
+                        .strftime("%Y.%m.%d")
+                    }}
+                </time>
+            </article>
+        {% else %}
+            <div class="tt-inquiry-empty">
+                <strong>
+                    등록된 문의가 없습니다.
+                </strong>
+
+                <p>
+                    서비스 이용 중 불편 사항을 문의해 주세요.
+                </p>
+
+                <a href="{{ url_for('inquiry_create') }}">
+                    첫 문의 작성하기
+                </a>
+            </div>
+        {% endfor %}
+    </section>
+
+    {% if total_pages > 1 %}
+        <nav class="tt-inquiry-pagination">
+            {% if page > 1 %}
+                <a
+                    href="{{ url_for(
+                        'inquiries',
+                        status=selected_status,
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page - 1
+                    ) }}"
+                >
+                    이전
+                </a>
+            {% else %}
+                <span>이전</span>
+            {% endif %}
+
+            <strong>{{ page }}</strong>
+
+            {% if page < total_pages %}
+                <a
+                    href="{{ url_for(
+                        'inquiries',
+                        status=selected_status,
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page + 1
+                    ) }}"
+                >
+                    다음
+                </a>
+            {% else %}
+                <span>다음</span>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

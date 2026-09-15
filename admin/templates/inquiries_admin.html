@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}
+문의 관리 | 또롱이 관리자
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            CUSTOMER SUPPORT
+        </span>
+
+        <h1>문의 관리</h1>
+
+        <p>
+            사용자 문의의 접수 상태를 확인하고
+            답변을 관리합니다.
+        </p>
+    </div>
+</section>
+
+<section class="admin-inquiry-summary">
+    <article>
+        <span>전체 문의</span>
+        <strong>{{ summary.total_count or 0 }}</strong>
+    </article>
+
+    <article>
+        <span>신규 접수</span>
+        <strong>{{ summary.submitted_count or 0 }}</strong>
+    </article>
+
+    <article>
+        <span>확인 중</span>
+        <strong>{{ summary.in_progress_count or 0 }}</strong>
+    </article>
+
+    <article>
+        <span>답변 완료</span>
+        <strong>{{ summary.answered_count or 0 }}</strong>
+    </article>
+</section>
+
+<section class="panel admin-inquiry-filter-panel">
+    <form
+        action="{{ url_for('inquiries_admin') }}"
+        method="get"
+        class="admin-inquiry-filter"
+    >
+        <select name="status">
+            {% for value, label in status_labels.items() %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="category">
+            {% for value, label in category_labels.items() %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_category == value %}
+                        selected
+                    {% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input
+            type="search"
+            name="keyword"
+            value="{{ keyword }}"
+            placeholder="회원명, 아이디, 제목 또는 내용 검색"
+        >
+
+        <button
+            type="submit"
+            class="primary-button"
+        >
+            조회
+        </button>
+
+        <a
+            href="{{ url_for('inquiries_admin') }}"
+            class="secondary-button"
+        >
+            초기화
+        </a>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                INQUIRY LIST
+            </span>
+
+            <h2>사용자 문의</h2>
+        </div>
+
+        <strong>{{ total_count }}건</strong>
+    </div>
+
+    <div class="table-wrap">
+        <table class="management-table admin-inquiry-table">
+            <thead>
+                <tr>
+                    <th>상태</th>
+                    <th>분류</th>
+                    <th>문의 제목</th>
+                    <th>사용자</th>
+                    <th>답변</th>
+                    <th>접수 시각</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for inquiry in inquiries %}
+                    <tr>
+                        <td>
+                            <span class="admin-inquiry-status admin-inquiry-status-{{ inquiry.status }}">
+                                {{
+                                    status_labels.get(
+                                        inquiry.status,
+                                        inquiry.status
+                                    )
+                                }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{
+                                category_labels.get(
+                                    inquiry.category,
+                                    "기타"
+                                )
+                            }}
+                        </td>
+
+                        <td class="admin-inquiry-title-cell">
+                            <strong>
+                                {{ inquiry.title }}
+                            </strong>
+
+                            {% if not inquiry.is_read_by_admin %}
+                                <small>새 문의</small>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ inquiry.user_name }}
+                            </strong>
+
+                            <small>
+                                {{ inquiry.username }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {% if inquiry.answer_count %}
+                                답변 등록
+                            {% else %}
+                                미답변
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{
+                                inquiry.created_at
+                                .strftime("%Y.%m.%d %H:%M")
+                            }}
+                        </td>
+
+                        <td class="table-action-cell">
+                            <a
+                                href="{{ url_for(
+                                    'inquiry_detail_admin',
+                                    inquiry_id=inquiry.id
+                                ) }}"
+                                class="table-detail-link"
+                            >
+                                상세
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td
+                            colspan="7"
+                            class="empty-cell"
+                        >
+                            등록된 문의가 없습니다.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_pages > 1 %}
+        <nav class="pagination admin-inquiry-pagination">
+            {% if page > 1 %}
+                <a
+                    href="{{ url_for(
+                        'inquiries_admin',
+                        status=selected_status,
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page - 1
+                    ) }}"
+                    class="pagination-edge"
+                >
+                    이전
+                </a>
+            {% else %}
+                <span class="disabled pagination-edge">
+                    이전
+                </span>
+            {% endif %}
+
+            <span class="admin-inquiry-page-number">
+                {{ page }} / {{ total_pages }}
+            </span>
+
+            {% if page < total_pages %}
+                <a
+                    href="{{ url_for(
+                        'inquiries_admin',
+                        status=selected_status,
+                        category=selected_category,
+                        keyword=keyword,
+                        page=page + 1
+                    ) }}"
+                    class="pagination-edge"
+                >
+                    다음
+                </a>
+            {% else %}
+                <span class="disabled pagination-edge">
+                    다음
+                </span>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ inquiry.title }} | 문의 관리
+{% endblock %}
+
+{% block content %}
+<section class="detail-heading admin-inquiry-detail-heading">
+    <div>
+        <a
+            href="{{ url_for('inquiries_admin') }}"
+            class="admin-inquiry-back-link"
+        >
+            ← 문의 목록
+        </a>
+
+        <span class="page-eyebrow">
+            INQUIRY DETAIL
+        </span>
+
+        <h1>{{ inquiry.title }}</h1>
+
+        <p>
+            {{ inquiry.user_name }}
+            · {{ inquiry.username }}
+            ·
+            {{
+                inquiry.created_at
+                .strftime("%Y.%m.%d %H:%M")
+            }}
+        </p>
+    </div>
+
+    <span class="admin-inquiry-status admin-inquiry-status-{{ inquiry.status }}">
+        {{
+            status_labels.get(
+                inquiry.status,
+                inquiry.status
+            )
+        }}
+    </span>
+</section>
+
+<section class="detail-layout admin-inquiry-detail-layout">
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    USER
+                </span>
+
+                <h2>문의자 정보</h2>
+            </div>
+        </div>
+
+        <dl class="information-list">
+            <div>
+                <dt>이름</dt>
+                <dd>{{ inquiry.user_name }}</dd>
+            </div>
+
+            <div>
+                <dt>아이디</dt>
+                <dd>{{ inquiry.username }}</dd>
+            </div>
+
+            <div>
+                <dt>이메일</dt>
+                <dd>{{ inquiry.email }}</dd>
+            </div>
+
+            <div>
+                <dt>휴대전화</dt>
+                <dd>{{ inquiry.phone }}</dd>
+            </div>
+
+            <div>
+                <dt>문의 분류</dt>
+                <dd>
+                    {{
+                        category_labels.get(
+                            inquiry.category,
+                            "기타"
+                        )
+                    }}
+                </dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="panel">
+        <div class="panel-header">
+            <div>
+                <span class="panel-eyebrow">
+                    STATUS
+                </span>
+
+                <h2>처리 상태</h2>
+            </div>
+        </div>
+
+        {% if inquiry.status == "cancelled" %}
+            <div class="admin-inquiry-cancelled-box">
+                사용자가 취소한 문의입니다.
+            </div>
+        {% else %}
+            <form
+                action="{{ url_for(
+                    'inquiry_status_admin',
+                    inquiry_id=inquiry.id
+                ) }}"
+                method="post"
+                class="admin-inquiry-status-form"
+            >
+                <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <select name="status">
+                    <option
+                        value="submitted"
+                        {% if inquiry.status == "submitted" %}
+                            selected
+                        {% endif %}
+                    >
+                        접수
+                    </option>
+
+                    <option
+                        value="in_progress"
+                        {% if inquiry.status == "in_progress" %}
+                            selected
+                        {% endif %}
+                    >
+                        확인 중
+                    </option>
+
+                    <option
+                        value="answered"
+                        {% if inquiry.status == "answered" %}
+                            selected
+                        {% endif %}
+                    >
+                        답변 완료
+                    </option>
+                </select>
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    상태 저장
+                </button>
+            </form>
+
+            <p class="admin-inquiry-status-guide">
+                답변 완료 상태는 관리자 답변이 등록된 후에만
+                선택할 수 있습니다.
+            </p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="panel admin-inquiry-question-panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                QUESTION
+            </span>
+
+            <h2>문의 내용</h2>
+        </div>
+    </div>
+
+    <div class="admin-inquiry-content">
+        {% for paragraph in inquiry.content.split('\n') %}
+            {% if paragraph | trim %}
+                <p>
+                    {{ paragraph | trim }}
+                </p>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel admin-inquiry-answer-panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                ADMIN ANSWER
+            </span>
+
+            <h2>관리자 답변</h2>
+        </div>
+    </div>
+
+    {% if inquiry.status != "cancelled" %}
+        <form
+            action="{{ url_for(
+                'inquiry_answer_admin',
+                inquiry_id=inquiry.id
+            ) }}"
+            method="post"
+            class="admin-inquiry-answer-form"
+        >
+            <input
+                type="hidden"
+                name="_csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <textarea
+                name="answer_content"
+                maxlength="5000"
+                placeholder="사용자에게 전달할 답변을 입력해 주세요."
+                required
+            >{% if answers %}{{ answers[-1].answer_content }}{% endif %}</textarea>
+
+            <div class="admin-inquiry-answer-actions">
+                <span>
+                    답변 저장 시 문의 상태가 답변 완료로 변경됩니다.
+                </span>
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    {% if answers %}
+                        답변 수정
+                    {% else %}
+                        답변 등록
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    {% endif %}
+
+    {% if answers %}
+        <div class="admin-inquiry-answer-record">
+            <div>
+                <strong>
+                    {{
+                        answers[-1].admin_name
+                        or answers[-1].admin_username
+                        or "시스템 관리자"
+                    }}
+                </strong>
+
+                <time>
+                    {{
+                        answers[-1].updated_at
+                        .strftime("%Y.%m.%d %H:%M")
+                    }}
+                </time>
+            </div>
+
+            {% for paragraph in answers[-1].answer_content.split('\n') %}
+                {% if paragraph | trim %}
+                    <p>
+                        {{ paragraph | trim }}
+                    </p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

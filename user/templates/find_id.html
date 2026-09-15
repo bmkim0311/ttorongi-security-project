@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}
+아이디 찾기 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="password-reset-page">
+    <div class="password-reset-layout">
+        <section class="password-reset-intro">
+            <span class="password-reset-eyebrow">
+                FIND USER ID
+            </span>
+
+            <div class="password-reset-icon">
+                👤
+            </div>
+
+            <h1>
+                가입한 아이디를<br>
+                확인하세요.
+            </h1>
+
+            <p>
+                회원가입 시 등록한 이메일 또는
+                휴대전화 번호로 본인 인증을 진행한 뒤
+                아이디를 확인할 수 있습니다.
+            </p>
+
+            <div class="password-reset-steps">
+                <div class="{% if stage == 'search' %}active{% endif %}">
+                    <span>1</span>
+                    회원 정보 확인
+                </div>
+
+                <div class="{% if stage in ('method', 'verify') %}active{% endif %}">
+                    <span>2</span>
+                    본인 인증
+                </div>
+
+                <div class="{% if stage == 'result' %}active{% endif %}">
+                    <span>3</span>
+                    아이디 확인
+                </div>
+            </div>
+        </section>
+
+        <section class="password-reset-card">
+            {% if stage == "search" %}
+                <div class="password-reset-heading">
+                    <span>
+                        FIND USER ID
+                    </span>
+
+                    <h2>
+                        아이디 찾기
+                    </h2>
+
+                    <p>
+                        가입할 때 등록한 이메일 또는
+                        휴대전화 번호를 입력해 주세요.
+                    </p>
+                </div>
+
+                <form
+                    action="{{ url_for('find_id') }}"
+                    method="post"
+                    class="password-reset-form"
+                >
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="search"
+                    >
+
+                    <label for="contact">
+                        이메일 또는 휴대전화
+                        <b>*</b>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="contact"
+                        name="contact"
+                        maxlength="190"
+                        autocomplete="email"
+                        placeholder="이메일 또는 휴대전화(010-1234-5678)"
+                        value="{{ contact }}"
+                        required
+                        autofocus
+                    >
+
+                    <button
+                        type="submit"
+                        class="password-reset-submit"
+                    >
+                        아이디 찾기
+                    </button>
+                </form>
+
+            {% elif stage == "method" %}
+                <div class="password-reset-heading">
+                    <span>
+                        VERIFY ACCOUNT
+                    </span>
+
+                    <h2>
+                        인증 방법 선택
+                    </h2>
+
+                    <p>
+                        입력한 정보와 일치하는 계정을 찾았습니다.
+                        인증번호를 받을 방법을 선택해 주세요.
+                    </p>
+                </div>
+
+                <form
+                    action="{{ url_for('find_id') }}"
+                    method="post"
+                    class="password-reset-form"
+                >
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="send_code"
+                    >
+
+                    <div class="reset-method-grid">
+                        {% if user["email"] %}
+                            <label class="reset-method-card">
+                                <input
+                                    type="radio"
+                                    name="method"
+                                    value="email"
+                                    required
+                                >
+
+                                <div class="reset-method-card-inner">
+                                    <div class="reset-method-icon">
+                                        ✉️
+                                    </div>
+
+                                    <div class="reset-method-copy">
+                                        <div class="reset-method-title-row">
+                                            <strong>
+                                                이메일 인증
+                                            </strong>
+                                        </div>
+
+                                        <small>
+                                            {{ masked_email }}
+                                        </small>
+
+                                        <p>
+                                            등록된 이메일로 인증번호를 전송합니다.
+                                        </p>
+                                    </div>
+
+                                    <div class="reset-method-check">
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </label>
+                        {% endif %}
+
+                        {% if user["phone"] %}
+                            <label class="reset-method-card">
+                                <input
+                                    type="radio"
+                                    name="method"
+                                    value="phone"
+                                    required
+                                >
+
+                                <div class="reset-method-card-inner">
+                                    <div class="reset-method-icon">
+                                        📱
+                                    </div>
+
+                                    <div class="reset-method-copy">
+                                        <div class="reset-method-title-row">
+                                            <strong>
+                                                휴대전화 인증
+                                            </strong>
+                                        </div>
+
+                                        <small>
+                                            {{ masked_phone }}
+                                        </small>
+
+                                        <p>
+                                            등록된 휴대전화로 인증번호를 전송합니다.
+                                        </p>
+                                    </div>
+
+                                    <div class="reset-method-check">
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </label>
+                        {% endif %}
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="password-reset-submit"
+                    >
+                        인증번호 받기
+                    </button>
+                </form>
+
+            {% elif stage == "verify" %}
+                <div class="password-reset-heading">
+                    <span>
+                        VERIFY CODE
+                    </span>
+
+                    <h2>
+                        인증번호 확인
+                    </h2>
+
+                    <p>
+                        발급된 6자리 인증번호를 입력해 주세요.
+                        인증번호는 5분 동안 유효합니다.
+                    </p>
+                </div>
+
+                <form
+                    action="{{ url_for('find_id') }}"
+                    method="post"
+                    class="password-reset-form"
+                >
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="verify_code"
+                    >
+
+                    <label for="verification_code">
+                        인증번호
+                        <b>*</b>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="verification_code"
+                        name="verification_code"
+                        minlength="6"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        placeholder="6자리 인증번호"
+                        required
+                        autofocus
+                    >
+
+                    <button
+                        type="submit"
+                        class="password-reset-submit"
+                    >
+                        인증번호 확인
+                    </button>
+                </form>
+
+                <form
+                    action="{{ url_for('find_id') }}"
+                    method="post"
+                    class="password-reset-secondary-form"
+                >
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="send_code"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="method"
+                        value="{{ session.get('find_id_method') }}"
+                    >
+
+                    <button type="submit">
+                        인증번호 다시 받기
+                    </button>
+                </form>
+
+            {% elif stage == "result" %}
+                <div class="password-reset-heading">
+                    <span>
+                        USER ID FOUND
+                    </span>
+
+                    <h2>
+                        아이디 확인
+                    </h2>
+
+                    <p>
+                        본인 인증이 완료되었습니다.
+                    </p>
+                </div>
+
+                <div class="find-id-result-card">
+                    <span>
+                        회원님의 아이디
+                    </span>
+
+                    <strong>
+                        {{ user["username"] }}
+                    </strong>
+                </div>
+
+                <a
+                    href="{{ url_for('login') }}"
+                    class="password-reset-submit find-id-login-button"
+                >
+                    로그인하기
+                </a>
+
+                <a
+                    href="{{ url_for('forgot_password') }}"
+                    class="find-id-password-link"
+                >
+                    비밀번호 찾기
+                </a>
+            {% endif %}
+
+            <div class="password-reset-links">
+    <a href="{{ url_for('login') }}">
+        로그인
+    </a>
+
+    <a href="{{ url_for('signup') }}">
+        회원가입
+    </a>
+
+    <a href="{{ url_for('forgot_password') }}">
+        비밀번호 찾기
+    </a>
+</div>
+        </section>
+    </div>
+</section>
+{% endblock %}

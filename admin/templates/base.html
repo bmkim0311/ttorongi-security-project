@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta name="theme-color" content="#07111f">
+
+    <title>
+        {% block title %}
+            또롱이 통합운영 관리자
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='admin.css') }}?v=20260729093000"
+    >
+</head>
+
+<body>
+    {% if g.admin %}
+        <div class="admin-shell">
+            <aside class="sidebar">
+                <a
+                    href="{{ url_for('dashboard') }}"
+                    class="brand"
+                >
+                    <span class="brand-mark">T</span>
+
+                    <span class="brand-copy">
+                        <strong>TTORONGI</strong>
+                        <small>CONTROL CENTER</small>
+                    </span>
+                </a>
+
+                <div class="sidebar-section-label">
+                    {{ g.admin.department_name }}
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a
+                        href="{{ url_for('dashboard') }}"
+                        class="nav-link
+                        {% if request.endpoint == 'dashboard' %}
+                            active
+                        {% endif %}"
+                    >
+                        <span class="nav-index">01</span>
+                        <span>운영 대시보드</span>
+                    </a>
+
+                    {% if admin_can('users') %}
+                        <a
+                            href="{{ url_for('users') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'users',
+                                'user_detail',
+                                'user_toggle_active'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">02</span>
+                            <span>회원 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('stations') %}
+                        <a
+                            href="{{ url_for('stations') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'stations',
+                                'station_create',
+                                'station_detail_admin',
+                                'station_edit',
+                                'station_status_change'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">03</span>
+                            <span>대여소 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('bicycles') %}
+                        <a
+                            href="{{ url_for('bicycles') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'bicycles',
+                                'bicycle_create',
+                                'bicycle_detail_admin',
+                                'bicycle_edit'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">04</span>
+                            <span>자전거 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('rentals') %}
+                        <a
+                            href="{{ url_for('rentals') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'rentals',
+                                'rental_detail_admin',
+                                'rental_force_return'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">05</span>
+                            <span>대여·반납 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('payments_admin') %}
+                        <a
+                            href="{{ url_for('payments_admin') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'payments_admin',
+                                'payment_detail_admin',
+                                'pass_products_admin',
+                                'pass_product_edit_admin',
+                                'issued_passes_admin'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">06</span>
+                            <span>이용권·결제 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('maintenance') %}
+                        <a
+                            href="{{ url_for('maintenance') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'maintenance',
+                                'maintenance_create',
+                                'maintenance_detail_admin',
+                                'maintenance_reassign',
+                                'maintenance_cancel'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">07</span>
+                            <span>정비 작업 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('notices_admin') %}
+                        <a
+                            href="{{ url_for('notices_admin') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'notices_admin',
+                                'notice_create_admin',
+                                'notice_detail_admin',
+                                'notice_edit_admin',
+                                'notice_publish_admin',
+                                'notice_delete_admin'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">08</span>
+                            <span>공지사항 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('inquiries_admin') %}
+                        <a
+                            href="{{ url_for('inquiries_admin') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'inquiries_admin',
+                                'inquiry_detail_admin',
+                                'inquiry_status_admin',
+                                'inquiry_answer_admin'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">09</span>
+                            <span>문의·민원 관리</span>
+                        </a>
+                    {% endif %}
+
+                    {% if admin_can('logs') %}
+                        <a
+                            href="{{ url_for('logs') }}"
+                            class="nav-link
+                            {% if request.endpoint in [
+                                'logs',
+                                'log_detail_admin'
+                            ] %}
+                                active
+                            {% endif %}"
+                        >
+                            <span class="nav-index">10</span>
+                            <span>통합 로그</span>
+                        </a>
+                    {% endif %}
+                </nav>
+
+                <div class="sidebar-bottom">
+                    <div class="admin-profile">
+                        <span class="admin-avatar">
+                            {{ g.admin.name[0] }}
+                        </span>
+
+                        <span>
+                            <strong>{{ g.admin.name }}</strong>
+
+                            <small>
+                                {{ g.admin.department_name }}
+                                ·
+                                {{ g.admin.permission_name }}
+                            </small>
+                        </span>
+                    </div>
+
+                    <form
+                        action="{{ url_for('logout') }}"
+                        method="post"
+                    >
+                        <input
+                            type="hidden"
+                            name="_csrf_token"
+                            value="{{ csrf_token() }}"
+                        >
+
+                        <button
+                            type="submit"
+                            class="logout-button"
+                        >
+                            로그아웃
+                        </button>
+                    </form>
+                </div>
+            </aside>
+
+            <main class="main-area">
+                <header class="topbar">
+                    <div>
+                        <span class="topbar-eyebrow">
+                            또롱이 공공자전거 통합운영기관
+                        </span>
+
+                        <strong>
+                            {{ g.admin.department_name }}
+                            관리자 시스템
+                        </strong>
+                    </div>
+
+                    <div class="topbar-status">
+                        <span class="status-dot"></span>
+
+                        <span>
+                            {{ g.admin.permission_name }}
+                            권한으로 접속 중
+                        </span>
+                    </div>
+                </header>
+
+                <div class="content-area">
+                    {% with messages = get_flashed_messages(
+                        with_categories=true
+                    ) %}
+                        {% if messages %}
+                            <div class="flash-stack">
+                                {% for category, message in messages %}
+                                    <div class="flash flash-{{ category }}">
+                                        <span>{{ message }}</span>
+
+                                        <button
+                                            type="button"
+                                            onclick="this.parentElement.remove()"
+                                            aria-label="알림 닫기"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    {% else %}
+        {% with messages = get_flashed_messages(
+            with_categories=true
+        ) %}
+            {% if messages %}
+                <div class="login-flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            <span>{{ message }}</span>
+
+                            <button
+                                type="button"
+                                onclick="this.parentElement.remove()"
+                                aria-label="알림 닫기"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block guest_content %}{% endblock %}
+    {% endif %}
+
+    <script>
+        window.setTimeout(function () {
+            document
+                .querySelectorAll(".flash")
+                .forEach(function (element) {
+                    element.classList.add("flash-hide");
+
+                    window.setTimeout(function () {
+                        element.remove();
+                    }, 300);
+                });
+        }, 4500);
+    </script>
+</body>
+</html>

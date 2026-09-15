@@ -1,0 +1,649 @@
+{% extends "base.html" %}
+
+{% block title %}
+이용권 결제 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="checkout-page">
+    <div class="checkout-container">
+        <div class="checkout-hero-card">
+            <div class="checkout-hero-top">
+                <a
+                    href="{{ url_for('pass_center', tab='purchase') }}"
+                    class="checkout-back-link"
+                >
+                    ← 이용권 목록
+                </a>
+
+                <div class="checkout-safe-badge">
+                    <span>✓</span>
+
+                    <div>
+                        <strong>안전한 결제</strong>
+                        <small>시연용 결제 서비스</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-hero-body">
+                <span class="checkout-eyebrow">
+                    SECURE CHECKOUT
+                </span>
+
+                <h1>이용권 결제</h1>
+
+                <p>
+                    주문 상품과 결제금액을 확인하고
+                    결제를 진행해 주세요.
+                </p>
+            </div>
+        </div>
+
+        {% if mode == "qr_waiting" %}
+            <section class="checkout-layout">
+                <article class="checkout-main-card">
+                    <div class="checkout-section-title">
+                        <span>QR</span>
+
+                        <div>
+                            <h2>QR 결제를 완료해 주세요.</h2>
+
+                            <p>
+                                모바일 결제 앱으로 아래 QR을 스캔한 뒤
+                                결제 완료 확인을 눌러 주세요.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="qr-checkout-body">
+                        <div class="checkout-qr-shell">
+                            <div class="checkout-qr-grid">
+                                {% for row in qr_matrix %}
+                                    {% for cell in row %}
+                                        <i class="{% if cell %}on{% endif %}"></i>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+
+                            <span class="checkout-qr-logo">🚲</span>
+                        </div>
+
+                        <div class="qr-order-info">
+                            <span class="payment-waiting-badge">
+                                결제 대기 중
+                            </span>
+
+                            <h3>{{ order["product_name"] }}</h3>
+
+                            <strong>
+                                {{ "{:,}".format(order["amount"]) }}원
+                            </strong>
+
+                            <dl>
+                                <div>
+                                    <dt>주문번호</dt>
+                                    <dd>{{ order["order_no"] }}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>결제코드</dt>
+                                    <dd>{{ order["payment_reference"] }}</dd>
+                                </div>
+                            </dl>
+
+                            <div class="qr-payment-timer">
+                                <span>남은 결제시간</span>
+                                <b id="paymentTimer">05:00</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qr-checkout-actions">
+                        <form
+                            method="post"
+                            action="{{ url_for('complete_qr_payment') }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="order_id"
+                                value="{{ order['id'] }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="checkout-primary-button"
+                            >
+                                결제 완료 확인
+                            </button>
+                        </form>
+
+                        <form
+                            method="post"
+                            action="{{ url_for('cancel_qr_payment') }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="order_id"
+                                value="{{ order['id'] }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="checkout-secondary-button"
+                            >
+                                결제 취소
+                            </button>
+                        </form>
+                    </div>
+                </article>
+
+                <aside class="checkout-summary">
+                    <span class="summary-eyebrow">
+                        ORDER SUMMARY
+                    </span>
+
+                    <h2>주문 요약</h2>
+
+                    <div class="summary-product">
+                        <span>🎫</span>
+
+                        <div>
+                            <strong>{{ order["product_name"] }}</strong>
+                            <small>기본 {{ order["pass_minutes"] }}분</small>
+                        </div>
+                    </div>
+
+                    <dl class="summary-price-list">
+                        <div>
+                            <dt>상품금액</dt>
+                            <dd>{{ "{:,}".format(order["amount"]) }}원</dd>
+                        </div>
+
+                        <div>
+                            <dt>결제수수료</dt>
+                            <dd>0원</dd>
+                        </div>
+                    </dl>
+
+                    <div class="summary-total">
+                        <span>최종 결제금액</span>
+                        <strong>{{ "{:,}".format(order["amount"]) }}원</strong>
+                    </div>
+                </aside>
+            </section>
+        {% else %}
+            <form
+                method="post"
+                action="{{ url_for('pass_checkout') }}"
+                class="checkout-layout"
+                id="checkoutForm"
+            >
+                <input
+                    type="hidden"
+                    name="product_id"
+                    value="{{ product['id'] }}"
+                >
+
+                <div class="checkout-main-column">
+                    <article class="checkout-main-card">
+                        <div class="checkout-section-title">
+                            <span>01</span>
+
+                            <div>
+                                <h2>주문 상품</h2>
+                                <p>
+                                    선택한 이용권의 조건과 결제 정보를 확인하세요.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="checkout-product">
+                            <span class="checkout-ticket-icon">🎫</span>
+
+                            <div>
+                                <small>
+                                    {% if product["pass_kind"] == "single" %}
+                                        일일 이용권
+                                    {% else %}
+                                        정기 이용권
+                                    {% endif %}
+                                </small>
+
+                                <h3>{{ product["product_name"] }}</h3>
+
+                                <p>{{ product["description"] }}</p>
+                            </div>
+
+                            <strong>
+                                {{ "{:,}".format(product["price"]) }}원
+                            </strong>
+                        </div>
+
+                        <div class="checkout-spec-grid">
+                            <div>
+                                <span>유효기간</span>
+                                <strong>{{ product["valid_days"] }}일</strong>
+                            </div>
+
+                            <div>
+                                <span>기본 이용</span>
+                                <strong>{{ product["pass_minutes"] }}분</strong>
+                            </div>
+
+                            <div>
+                                <span>초과요금</span>
+                                <strong>
+                                    {{ product["overtime_unit_minutes"] }}분당
+                                    {{ "{:,}".format(product["overtime_fee"]) }}원
+                                </strong>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="checkout-main-card">
+                        <div class="checkout-section-title">
+                            <span>02</span>
+
+                            <div>
+                                <h2>결제수단 선택</h2>
+                                <p>
+                                    원하는 방식으로 결제를 진행할 수 있습니다.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="checkout-method-grid">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="card"
+                                    checked
+                                >
+
+                                <span>
+                                    <b>CARD</b>
+                                    <strong>신용·체크카드</strong>
+                                    <small>국내 발급 카드</small>
+                                </span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="easy"
+                                >
+
+                                <span>
+                                    <b>PAY</b>
+                                    <strong>간편결제</strong>
+                                    <small>카카오·네이버·토스</small>
+                                </span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="phone"
+                                >
+
+                                <span>
+                                    <b>TEL</b>
+                                    <strong>휴대전화 결제</strong>
+                                    <small>통신사 본인인증</small>
+                                </span>
+                            </label>
+
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="qr"
+                                >
+
+                                <span>
+                                    <b>QR</b>
+                                    <strong>QR 결제</strong>
+                                    <small>모바일 QR 스캔</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <section
+                            class="checkout-detail-panel active"
+                            data-payment-panel="card"
+                        >
+                            <h3>카드정보 입력</h3>
+
+                            <div class="checkout-input-grid">
+                                <label class="checkout-wide-input">
+                                    <span>카드번호</span>
+
+                                    <input
+                                        type="text"
+                                        name="card_number"
+                                        maxlength="19"
+                                        inputmode="numeric"
+                                        placeholder="1234 5678 9012 3456"
+                                    >
+                                </label>
+
+                                <label>
+                                    <span>유효기간</span>
+
+                                    <input
+                                        type="text"
+                                        name="card_expiry"
+                                        maxlength="5"
+                                        placeholder="MM/YY"
+                                    >
+                                </label>
+
+                                <label>
+                                    <span>카드 명의자</span>
+
+                                    <input
+                                        type="text"
+                                        name="card_owner"
+                                        placeholder="예: 김또롱"
+                                    >
+                                </label>
+                            </div>
+
+                            <p class="checkout-demo-message">
+                                프로젝트 시연용 결제창이며
+                                실제 카드 승인 요청은 발생하지 않습니다.
+                            </p>
+                        </section>
+
+                        <section
+                            class="checkout-detail-panel"
+                            data-payment-panel="easy"
+                        >
+                            <h3>간편결제 서비스 선택</h3>
+
+                            <div class="easy-payment-grid">
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="easy_provider"
+                                        value="kakao"
+                                    >
+                                    <span>카카오페이</span>
+                                </label>
+
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="easy_provider"
+                                        value="naver"
+                                    >
+                                    <span>네이버페이</span>
+                                </label>
+
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="easy_provider"
+                                        value="toss"
+                                    >
+                                    <span>토스페이</span>
+                                </label>
+                            </div>
+                        </section>
+
+                        <section
+                            class="checkout-detail-panel"
+                            data-payment-panel="phone"
+                        >
+                            <h3>휴대전화 정보 입력</h3>
+
+                            <div class="checkout-input-grid">
+                                <label>
+                                    <span>통신사</span>
+
+                                    <select name="phone_carrier">
+                                        <option value="">통신사 선택</option>
+                                        <option value="skt">SKT</option>
+                                        <option value="kt">KT</option>
+                                        <option value="lgu">LG U+</option>
+                                    </select>
+                                </label>
+
+                                <label>
+                                    <span>휴대전화 번호</span>
+
+                                    <input
+                                        type="tel"
+                                        name="payment_phone"
+                                        placeholder="010-1234-5678"
+                                    >
+                                </label>
+                            </div>
+                        </section>
+
+                        <section
+                            class="checkout-detail-panel"
+                            data-payment-panel="qr"
+                        >
+                            <div class="qr-method-information">
+                                <span>▦</span>
+
+                                <div>
+                                    <h3>QR 결제</h3>
+
+                                    <p>
+                                        결제하기를 누르면
+                                        이 주문 전용 QR 코드가 생성됩니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                    </article>
+
+                    <article class="checkout-agreement-card">
+                        <label>
+                            <input type="checkbox" required>
+
+                            <span>
+                                주문 상품, 이용조건 및 결제금액을 확인했으며
+                                구매에 동의합니다.
+                            </span>
+                        </label>
+                    </article>
+                </div>
+
+                <aside class="checkout-summary">
+                    <span class="summary-eyebrow">
+                        ORDER SUMMARY
+                    </span>
+
+                    <h2>결제금액</h2>
+
+                    <div class="summary-product">
+                        <span>🎫</span>
+
+                        <div>
+                            <strong>{{ product["product_name"] }}</strong>
+                            <small>기본 {{ product["pass_minutes"] }}분</small>
+                        </div>
+                    </div>
+
+                    <dl class="summary-price-list">
+                        <div>
+                            <dt>상품금액</dt>
+                            <dd>{{ "{:,}".format(product["price"]) }}원</dd>
+                        </div>
+
+                        <div>
+                            <dt>결제수수료</dt>
+                            <dd>0원</dd>
+                        </div>
+                    </dl>
+
+                    <div class="summary-total">
+                        <span>최종 결제금액</span>
+
+                        <strong>
+                            {{ "{:,}".format(product["price"]) }}원
+                        </strong>
+                    </div>
+
+                    {% if session.get("guest_mode") %}
+                        <div class="guest-checkout-guide">
+                            <strong>비회원 일일권</strong>
+
+                            <p>
+                                구매 후 현재 비회원 세션에서
+                                QR 대여에 사용할 수 있습니다.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <button
+                        type="submit"
+                        class="checkout-primary-button"
+                    >
+                        {{ "{:,}".format(product["price"]) }}원 결제하기
+                    </button>
+
+                    <p class="checkout-security-message">
+                        ✓ 결제정보 보호가 적용된 시연 환경입니다.
+                    </p>
+                </aside>
+            </form>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+        const paymentInputs =
+            document.querySelectorAll(
+                'input[name="payment_method"]'
+            );
+
+        const paymentPanels =
+            document.querySelectorAll(
+                "[data-payment-panel]"
+            );
+
+        function showSelectedPaymentPanel() {
+            const checkedInput =
+                document.querySelector(
+                    'input[name="payment_method"]:checked'
+                );
+
+            if (!checkedInput) {
+                return;
+            }
+
+            paymentPanels.forEach(
+                function (panel) {
+                    panel.classList.toggle(
+                        "active",
+                        panel.dataset.paymentPanel
+                            === checkedInput.value
+                    );
+                }
+            );
+        }
+
+        paymentInputs.forEach(
+            function (input) {
+                input.addEventListener(
+                    "change",
+                    showSelectedPaymentPanel
+                );
+            }
+        );
+
+        showSelectedPaymentPanel();
+
+        const cardNumber =
+            document.querySelector(
+                'input[name="card_number"]'
+            );
+
+        if (cardNumber) {
+            cardNumber.addEventListener(
+                "input",
+                function () {
+                    const digits = cardNumber
+                        .value
+                        .replace(/\D/g, "")
+                        .slice(0, 16);
+
+                    cardNumber.value = digits.replace(
+                        /(\d{4})(?=\d)/g,
+                        "$1 "
+                    );
+                }
+            );
+        }
+
+        const cardExpiry =
+            document.querySelector(
+                'input[name="card_expiry"]'
+            );
+
+        if (cardExpiry) {
+            cardExpiry.addEventListener(
+                "input",
+                function () {
+                    const digits = cardExpiry
+                        .value
+                        .replace(/\D/g, "")
+                        .slice(0, 4);
+
+                    cardExpiry.value = (
+                        digits.length > 2
+                            ? digits.slice(0, 2)
+                                + "/"
+                                + digits.slice(2)
+                            : digits
+                    );
+                }
+            );
+        }
+
+        const timer =
+            document.getElementById(
+                "paymentTimer"
+            );
+
+        if (timer) {
+            let secondsLeft = 300;
+
+            window.setInterval(
+                function () {
+                    if (secondsLeft <= 0) {
+                        timer.textContent = "00:00";
+                        return;
+                    }
+
+                    secondsLeft -= 1;
+
+                    const minutes = String(
+                        Math.floor(secondsLeft / 60)
+                    ).padStart(2, "0");
+
+                    const seconds = String(
+                        secondsLeft % 60
+                    ).padStart(2, "0");
+
+                    timer.textContent =
+                        minutes + ":" + seconds;
+                },
+                1000
+            );
+        }
+    }
+);
+</script>
+{% endblock %}

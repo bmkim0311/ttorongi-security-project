@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}
+이용내역 | 또롱이
+
+<style>
+.rental-history-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e1e8e3;
+}
+
+.rental-detail-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 17px;
+    border: 1px solid #d4dfd7;
+    border-radius: 11px;
+    color: #4e6858;
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+.rental-detail-button:hover {
+    border-color: #93ae9a;
+    background: #f1f7f3;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+<section class="service-page">
+    <div class="service-container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">
+                    HISTORY & PASSES
+                </span>
+
+                <h1>
+                    이용내역 · 결제내역
+                </h1>
+
+                <p>
+                    자전거 이용기록과 보유 이용권,
+                    결제내역을 함께 확인하세요.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('pass_center', tab='purchase') }}"
+                class="main-button"
+            >
+                이용권 구매
+            </a>
+        </div>
+
+        <section class="history-summary">
+            <article>
+                <span>전체 이용</span>
+                <strong>{{ total_count }}</strong>
+                <small>회</small>
+            </article>
+
+            <article>
+                <span>누적 이용시간</span>
+                <strong>{{ total_minutes }}</strong>
+                <small>분</small>
+            </article>
+
+            <article>
+                <span>초과 이용요금</span>
+                <strong>{{ "{:,}".format(total_fee) }}</strong>
+                <small>원</small>
+            </article>
+
+            <article>
+                <span>이용권 결제금액</span>
+                <strong>{{ "{:,}".format(total_payment) }}</strong>
+                <small>원</small>
+            </article>
+        </section>
+
+        {% if active_rental %}
+            <section class="active-rental-history-card">
+                <div class="history-active-top">
+                    <div>
+                        <span class="eyebrow">
+                            CURRENT RENTAL
+                        </span>
+
+                        <h2>
+                            {{ active_rental["bicycle_code"] }}
+                        </h2>
+
+                        <p>
+                            {{ active_rental["station_name"] }}에서
+                            {{ active_rental["rental_time"] }}에 대여함
+                        </p>
+                    </div>
+
+                    <div class="history-active-pass">
+                        <span>사용 이용권</span>
+                        <strong>{{ active_rental["pass_name"] or "-" }}</strong>
+                    </div>
+                </div>
+
+                <form
+                    method="post"
+                    action="{{ url_for('return_bicycle_by_id') }}"
+                    class="return-form-box"
+                >
+                    <input
+                        type="hidden"
+                        name="rental_id"
+                        value="{{ active_rental['id'] }}"
+                    >
+
+                    <label for="returnStation">
+                        반납 대여소 선택
+                    </label>
+
+                    <div class="return-form-row">
+                        <select
+                            id="returnStation"
+                            name="station_id"
+                            required
+                        >
+                            <option value="">
+                                반납할 대여소를 선택하세요
+                            </option>
+
+                            {% for station in stations %}
+                                <option value="{{ station['id'] }}">
+                                    {{ station["station_code"] }} · {{ station["station_name"] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <button
+                            type="submit"
+                            class="main-button"
+                        >
+                            자전거 반납
+                        </button>
+                    </div>
+                </form>
+            </section>
+        {% endif %}
+
+        <section class="history-section-group">
+            <div class="history-block">
+                <div class="history-block-heading">
+                    <h2>자전거 이용내역</h2>
+                </div>
+
+                {% if rentals %}
+                    <div class="order-card-list">
+                        {% for rental in rentals %}
+                            <article class="order-card">
+                                <div class="order-card-top">
+                                    <strong>{{ rental["bicycle_code"] }}</strong>
+
+                                    <span class="order-state state-{{ rental['status'] }}">
+                                        {% if rental["status"] == "renting" %}
+                                            대여 중
+                                        {% else %}
+                                            반납 완료
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                <div class="order-card-grid">
+                                    <div>
+                                        <span>이용권</span>
+                                        <b>{{ rental["pass_name"] or "-" }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>출발</span>
+                                        <b>
+                                            {{ rental["departure_station_code"] }}
+                                            ·
+                                            {{ rental["departure_station_name"] }}
+                                        </b>
+                                    </div>
+
+                                    <div>
+                                        <span>반납</span>
+                                        <b>
+                                            {% if rental["return_station_code"] %}
+                                                {{ rental["return_station_code"] }} · {{ rental["return_station_name"] }}
+                                            {% else %}
+                                                반납 대기
+                                            {% endif %}
+                                        </b>
+                                    </div>
+
+                                    <div>
+                                        <span>대여시간</span>
+                                        <b>{{ rental["rental_time"] }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>반납시간</span>
+                                        <b>{{ rental["return_time"] or "-" }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>이용시간</span>
+                                        <b>
+                                            {% if rental["status"] == "renting" %}
+                                                이용 중
+                                            {% else %}
+                                                {{ rental["usage_minutes"] }}분
+                                            {% endif %}
+                                        </b>
+                                    </div>
+
+                                    <div>
+                                        <span>이용요금</span>
+                                        <b>{{ "{:,}".format(rental["fee"]) }}원</b>
+                                    </div>
+                                </div>
+
+                                <div class="rental-history-actions">
+                                    <a
+                                        href="{{ url_for(
+                                            'rental_detail',
+                                            rental_id=rental['id']
+                                        ) }}"
+                                        class="rental-detail-button"
+                                    >
+                                        이용 상세보기
+                                    </a>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-inline-state">
+                        아직 자전거 이용내역이 없습니다.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="history-block">
+                <div class="history-block-heading">
+                    <h2>보유 이용권</h2>
+                </div>
+
+                {% if active_passes %}
+                    <div class="pass-record-grid">
+                        {% for user_pass in active_passes %}
+                            <article class="pass-record-card">
+                                <div class="pass-record-top">
+                                    <strong>{{ user_pass["product_name"] }}</strong>
+                                    <span class="order-state state-{{ user_pass['status'] }}">
+                                        {{ user_pass["status"] }}
+                                    </span>
+                                </div>
+
+                                <div class="pass-record-body">
+                                    <div>
+                                        <span>유효기간</span>
+                                        <b>{{ user_pass["valid_from"] }} ~ {{ user_pass["expires_at"] }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>기본 이용</span>
+                                        <b>{{ user_pass["pass_minutes"] }}분</b>
+                                    </div>
+
+                                    <div>
+                                        <span>남은 사용</span>
+                                        <b>
+                                            {% if user_pass["is_unlimited"] == 1 %}
+                                                무제한
+                                            {% elif user_pass["remaining_uses"] is not none %}
+                                                {{ user_pass["remaining_uses"] }}회
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </b>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-inline-state">
+                        현재 보유한 이용권이 없습니다.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="history-block">
+                <div class="history-block-heading">
+                    <h2>결제내역</h2>
+                </div>
+
+                {% if payment_orders %}
+                    <div class="order-card-list">
+                        {% for order in payment_orders %}
+                            <article class="order-card">
+                                <div class="order-card-top">
+                                    <strong>{{ order["product_name"] }}</strong>
+                                    <span class="order-state state-{{ order['payment_status'] }}">
+                                        {{ order["payment_status"] }}
+                                    </span>
+                                </div>
+
+                                <div class="order-card-grid">
+                                    <div>
+                                        <span>주문번호</span>
+                                        <b>{{ order["order_no"] }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>결제수단</span>
+                                        <b>{{ order["payment_method"] }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>결제금액</span>
+                                        <b>{{ "{:,}".format(order["amount"]) }}원</b>
+                                    </div>
+
+                                    <div>
+                                        <span>주문시각</span>
+                                        <b>{{ order["ordered_at"] }}</b>
+                                    </div>
+
+                                    <div>
+                                        <span>결제시각</span>
+                                        <b>{{ order["paid_at"] or "-" }}</b>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-inline-state">
+                        아직 결제내역이 없습니다.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</section>
+{% endblock %}

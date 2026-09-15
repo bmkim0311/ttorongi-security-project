@@ -1,0 +1,919 @@
+{% extends "base.html" %}
+
+{% block title %}
+이용권 구매 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="service-page pass-page">
+    <div class="service-container">
+        <div class="page-heading pass-page-heading">
+            <div>
+                <span class="eyebrow">
+                    PASS & PAYMENT
+                </span>
+
+                <h1>
+                    이용권 구매 · QR 대여
+                </h1>
+
+                <p>
+                    이용권을 구매하고 결제한 뒤,
+                    QR 자전거 대여까지 한 번에 이용하세요.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('history') }}"
+                class="sub-button"
+            >
+                내 이용내역 보기
+            </a>
+        </div>
+
+        <nav class="pass-tab-nav">
+            <a
+                href="{{ url_for('pass_center', tab='purchase') }}"
+                class="{% if tab == 'purchase' %}active{% endif %}"
+            >
+                이용권 구매
+            </a>
+
+            <a
+                href="{{ url_for('pass_center', tab='rental') }}"
+                class="{% if tab == 'rental' %}active{% endif %}"
+            >
+                QR 자전거 대여
+            </a>
+
+            <a
+                href="{{ url_for('pass_center', tab='payment') }}"
+                class="{% if tab == 'payment' %}active{% endif %}"
+            >
+                결제내역
+            </a>
+        </nav>
+
+        <section class="pass-status-grid">
+            <article class="status-panel">
+                <span class="status-label">
+                    현재 사용 가능 이용권
+                </span>
+
+                {% if current_pass %}
+                    <strong>
+                        {{ current_pass["product_name"] }}
+                    </strong>
+
+                    <p>
+                        기본 {{ current_pass["pass_minutes"] }}분 ·
+                        만료 {{ current_pass["expires_at"] }}
+                    </p>
+                {% else %}
+                    <strong>
+                        이용권 없음
+                    </strong>
+
+                    <p>
+                        먼저 이용권을 구매해야 QR 대여를 진행할 수 있습니다.
+                    </p>
+                {% endif %}
+            </article>
+
+            <article class="status-panel">
+                <span class="status-label">
+                    현재 대여 상태
+                </span>
+
+                {% if active_rental %}
+                    <strong>
+                        {{ active_rental["bicycle_code"] }}
+                    </strong>
+
+                    <p>
+                        {{ active_rental["rental_time"] }}부터 이용 중
+                    </p>
+                {% else %}
+                    <strong>
+                        대여 중 아님
+                    </strong>
+
+                    <p>
+                        현재 이용 중인 자전거가 없습니다.
+                    </p>
+                {% endif %}
+            </article>
+
+            <article class="status-panel">
+                <span class="status-label">
+                    최근 결제 상태
+                </span>
+
+                {% if payment_orders %}
+                    <strong>
+                        {{
+                            payment_method_labels.get(
+                                payment_orders[0]["payment_method"],
+                                payment_orders[0]["payment_method"]
+                            )
+                        }}
+                    </strong>
+
+                    <p>
+                        {{ payment_orders[0]["product_name"] }} ·
+                        {{ payment_orders[0]["payment_status"] }}
+                    </p>
+                {% else %}
+                    <strong>
+                        결제 내역 없음
+                    </strong>
+
+                    <p>
+                        아직 이용권 결제 기록이 없습니다.
+                    </p>
+                {% endif %}
+            </article>
+        </section>
+
+        {% if tab == "purchase" %}
+            {% if current_pass %}
+                <section class="pass-notice-banner">
+                    <div>
+                        <span>현재 이용 가능</span>
+                        <strong>{{ current_pass["product_name"] }}</strong>
+                        <p>
+                            기본 {{ current_pass["pass_minutes"] }}분 ·
+                            초과 {{ current_pass["overtime_unit_minutes"] }}분당
+                            {{ "{:,}".format(current_pass["overtime_fee"]) }}원
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ url_for('pass_center', tab='rental') }}"
+                        class="main-button"
+                    >
+                        바로 QR 대여하기
+                    </a>
+                </section>
+            {% endif %}
+
+            <section class="pass-purchase-guide">
+                {% if session.get("guest_mode") %}
+                    <div>
+                        <span>
+                            비회원 이용 안내
+                        </span>
+
+                        <strong>
+                            1시간권과 2시간권은 비회원도 구매할 수 있습니다.
+                        </strong>
+
+                        <p>
+                            정기권은 회원 전용 상품입니다.
+                            구매 버튼을 누르면 전용 결제창으로 이동합니다.
+                        </p>
+                    </div>
+                {% else %}
+                    <div>
+                        <span>
+                            이용권 구매
+                        </span>
+
+                        <strong>
+                            원하는 이용권을 선택해 주세요.
+                        </strong>
+
+                        <p>
+                            상품 확인 후 전용 결제창에서
+                            결제수단을 선택할 수 있습니다.
+                        </p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="product-grid">
+                {% for product in pass_products %}
+                    <article
+                        class="
+                            product-card
+                            {% if (
+                                session.get('guest_mode')
+                                and product['pass_kind'] == 'period'
+                            ) %}
+                                product-card-locked
+                            {% endif %}
+                        "
+                    >
+                        <div class="product-card-top">
+                            <span class="product-badge">
+                                {% if product["pass_kind"] == "single" %}
+                                    1회권
+                                {% else %}
+                                    정기권
+                                {% endif %}
+                            </span>
+
+                            <span class="product-code">
+                                {{ product["product_code"] }}
+                            </span>
+                        </div>
+
+                        <h2>
+                            {{ product["product_name"] }}
+                        </h2>
+
+                        <strong class="product-price">
+                            {{ "{:,}".format(product["price"]) }}원
+                        </strong>
+
+                        <ul class="product-detail-list">
+                            <li>
+                                유효기간
+                                <b>
+                                    {{ product["valid_days"] }}일
+                                </b>
+                            </li>
+
+                            <li>
+                                기본 이용
+                                <b>
+                                    {{ product["pass_minutes"] }}분
+                                </b>
+                            </li>
+
+                            <li>
+                                초과요금
+                                <b>
+                                    {{ product["overtime_unit_minutes"] }}분당
+                                    {{ "{:,}".format(product["overtime_fee"]) }}원
+                                </b>
+                            </li>
+                        </ul>
+
+                        <p class="product-description">
+                            {{ product["description"] }}
+                        </p>
+
+                        {% if (
+                            session.get("guest_mode")
+                            and product["pass_kind"] == "period"
+                        ) %}
+                            <div class="product-member-lock">
+                                <strong>
+                                    회원 전용 정기권
+                                </strong>
+
+                                <span>
+                                    로그인 후 구매할 수 있습니다.
+                                </span>
+                            </div>
+
+                            <a
+                                href="{{ url_for('guest_login') }}"
+                                class="product-login-button"
+                            >
+                                로그인 후 구매
+                            </a>
+                        {% else %}
+                            <a
+                                href="{{ url_for('pass_checkout', product_id=product['id']) }}"
+                                class="product-checkout-button"
+                            >
+                                <span>
+                                    {{ product["product_name"] }} 구매하기
+                                </span>
+
+                                <b>
+                                    →
+                                </b>
+                            </a>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </section>
+        {% elif tab == "rental" %}
+            {% if not current_pass %}
+                <section class="empty-service-state pass-empty-state">
+                    <div>🎫</div>
+
+                    <h2>
+                        사용 가능한 이용권이 없습니다.
+                    </h2>
+
+                    <p>
+                        QR 자전거를 대여하려면 먼저 이용권을 구매해 주세요.
+                    </p>
+
+                    <a
+                        href="{{ url_for('pass_center', tab='purchase') }}"
+                        class="main-button"
+                    >
+                        이용권 구매하러 가기
+                    </a>
+                </section>
+            {% elif active_rental %}
+                <section class="current-rental-panel">
+                    <div class="current-rental-bike">
+                        🚲
+                    </div>
+
+                    <span class="current-rental-status">
+                        현재 대여 중
+                    </span>
+
+                    <h2>
+                        {{ active_rental["bicycle_code"] }}
+                    </h2>
+
+                    <dl>
+                        <div>
+                            <dt>이용권</dt>
+                            <dd>{{ active_rental["pass_name"] or "-" }}</dd>
+                        </div>
+
+                        <div>
+                            <dt>출발 대여소</dt>
+                            <dd>{{ active_rental["station_name"] }}</dd>
+                        </div>
+
+                        <div>
+                            <dt>대여 시작</dt>
+                            <dd>{{ active_rental["rental_time"] }}</dd>
+                        </div>
+
+                        <div>
+                            <dt>배터리</dt>
+                            <dd>{{ active_rental["battery_level"] }}%</dd>
+                        </div>
+                    </dl>
+
+                    <a
+                        href="{{ url_for('history') }}"
+                        class="main-button full-button"
+                    >
+                        이용내역에서 반납하기
+                    </a>
+                </section>
+            {% else %}
+                <section class="pass-notice-banner small-gap">
+                    <div>
+                        <span>현재 사용할 이용권</span>
+                        <strong>{{ current_pass["product_name"] }}</strong>
+                        <p>
+                            기본 {{ current_pass["pass_minutes"] }}분 ·
+                            만료 {{ current_pass["expires_at"] }}
+                        </p>
+                    </div>
+                </section>
+
+                <section class="qr-rental-layout">
+                    <article class="qr-camera-card">
+                        <div class="qr-camera-header">
+                            <span>
+                                CAMERA SCAN
+                            </span>
+
+                            <strong id="cameraStatus">
+                                카메라 준비
+                            </strong>
+                        </div>
+
+                        <div class="qr-camera-area">
+                            <video
+                                id="qrVideo"
+                                autoplay
+                                muted
+                                playsinline
+                            ></video>
+
+                            <div
+                                class="camera-placeholder"
+                                id="cameraPlaceholder"
+                            >
+                                <div class="camera-placeholder-icon">
+                                    ▣
+                                </div>
+
+                                <strong>
+                                    카메라로 QR 코드를 스캔하세요
+                                </strong>
+
+                                <p>
+                                    브라우저 카메라 권한을 허용해야 합니다.
+                                </p>
+                            </div>
+
+                            <div class="qr-scan-frame">
+                                <span class="scan-corner scan-top-left"></span>
+                                <span class="scan-corner scan-top-right"></span>
+                                <span class="scan-corner scan-bottom-left"></span>
+                                <span class="scan-corner scan-bottom-right"></span>
+
+                                <div class="scan-line"></div>
+                            </div>
+                        </div>
+
+                        <div class="qr-camera-actions">
+                            <button
+                                type="button"
+                                class="camera-start-button"
+                                id="cameraStartButton"
+                            >
+                                카메라 시작
+                            </button>
+
+                            <button
+                                type="button"
+                                class="camera-stop-button"
+                                id="cameraStopButton"
+                                disabled
+                            >
+                                카메라 종료
+                            </button>
+                        </div>
+
+                        <p class="camera-support-message">
+                            Chrome 또는 Edge 브라우저 사용을 권장합니다.
+                        </p>
+                    </article>
+
+                    <article class="qr-rental-card">
+                        <div class="qr-rental-card-heading">
+                            <span class="eyebrow">
+                                BICYCLE INFORMATION
+                            </span>
+
+                            <h2>
+                                자전거 확인
+                            </h2>
+
+                            <p>
+                                QR 인식 결과를 확인한 후
+                                대여 버튼을 눌러 주세요.
+                            </p>
+                        </div>
+
+                        <form
+                            method="post"
+                            action="{{ url_for('qr_rental') }}"
+                            id="rentalForm"
+                            class="qr-rental-form"
+                        >
+                            <label for="qrCodeInput">
+                                QR 코드 또는 자전거 번호
+                            </label>
+
+                            <div class="qr-input-row">
+                                <input
+                                    id="qrCodeInput"
+                                    name="qr_code"
+                                    type="text"
+                                    value="{{ preview_code }}"
+                                    placeholder="예: TTORONGI-001"
+                                    autocomplete="off"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    id="previewButton"
+                                >
+                                    조회
+                                </button>
+                            </div>
+
+                            <div
+                                class="scan-result-card
+                                {% if bicycle_preview %}
+                                    scan-result-show
+                                {% endif %}"
+                                id="scanResultCard"
+                            >
+                                <div class="scan-result-icon">
+                                    🚲
+                                </div>
+
+                                <div class="scan-result-information">
+                                    <span>
+                                        자전거 번호
+                                    </span>
+
+                                    <strong id="resultBicycleCode">
+                                        {% if bicycle_preview %}
+                                            {{ bicycle_preview["bicycle_code"] }}
+                                        {% else %}
+                                            QR 스캔 대기
+                                        {% endif %}
+                                    </strong>
+
+                                    <dl>
+                                        <div>
+                                            <dt>대여소</dt>
+
+                                            <dd id="resultStation">
+                                                {% if bicycle_preview %}
+                                                    {{ bicycle_preview["station_name"] }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>배터리</dt>
+
+                                            <dd id="resultBattery">
+                                                {% if bicycle_preview %}
+                                                    {{ bicycle_preview["battery_level"] }}%
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </dd>
+                                        </div>
+
+                                        <div>
+                                            <dt>상태</dt>
+
+                                            <dd
+                                                id="resultStatus"
+                                                class="result-normal"
+                                            >
+                                                {% if bicycle_preview %}
+                                                    {% if bicycle_preview["status"] == "available" %}
+                                                        대여 가능
+                                                    {% else %}
+                                                        이용 불가
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <div class="rental-ticket">
+                                <span>사용 이용권</span>
+                                <strong>{{ current_pass["product_name"] }}</strong>
+                                <p>
+                                    기본 {{ current_pass["pass_minutes"] }}분 ·
+                                    초과 {{ current_pass["overtime_unit_minutes"] }}분당
+                                    {{ "{:,}".format(current_pass["overtime_fee"]) }}원
+                                </p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="main-button full-button rental-submit"
+                            >
+                                자전거 대여하기
+                            </button>
+                        </form>
+
+                        <div class="qr-test-information">
+                            <span>TEST QR</span>
+                            <code>TTORONGI-001</code>
+                            <code>BIKE-001</code>
+                        </div>
+                    </article>
+                </section>
+            {% endif %}
+        {% else %}
+            {% if pending_order and pending_order["payment_status"] == "ready" and pending_order["payment_method"] == "qr" %}
+                <section class="payment-focus-layout">
+                    <article class="payment-focus-card">
+                        <span class="eyebrow">
+                            QR PAYMENT
+                        </span>
+
+                        <h2>
+                            QR 결제 진행
+                        </h2>
+
+                        <p>
+                            아래 결제용 QR을 스캔한 뒤
+                            결제 완료 버튼을 눌러 주세요.
+                        </p>
+
+                        <div class="mock-qr-wrapper">
+                            <div class="mock-qr-grid">
+                                {% for row in qr_matrix %}
+                                    {% for cell in row %}
+                                        <span class="qr-cell {% if cell %}on{% endif %}"></span>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="payment-order-meta">
+                            <div>
+                                <span>주문번호</span>
+                                <strong>{{ pending_order["order_no"] }}</strong>
+                            </div>
+
+                            <div>
+                                <span>이용권</span>
+                                <strong>{{ pending_order["product_name"] }}</strong>
+                            </div>
+
+                            <div>
+                                <span>결제금액</span>
+                                <strong>{{ "{:,}".format(pending_order["amount"]) }}원</strong>
+                            </div>
+
+                            <div>
+                                <span>결제코드</span>
+                                <strong>{{ pending_order["payment_reference"] }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="payment-focus-actions">
+                            <form
+                                method="post"
+                                action="{{ url_for('complete_qr_payment') }}"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="order_id"
+                                    value="{{ pending_order['id'] }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="main-button"
+                                >
+                                    결제 완료 처리
+                                </button>
+                            </form>
+
+                            <form
+                                method="post"
+                                action="{{ url_for('cancel_qr_payment') }}"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="order_id"
+                                    value="{{ pending_order['id'] }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="sub-button"
+                                >
+                                    결제 취소
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                </section>
+            {% endif %}
+
+            <section class="history-section-group">
+                <div class="history-block">
+                    <div class="history-block-heading">
+                        <h2>최근 결제내역</h2>
+                    </div>
+
+                    {% if payment_orders %}
+                        <div class="order-card-list">
+                            {% for order in payment_orders %}
+                                <article class="order-card">
+                                    <div class="order-card-top">
+                                        <strong>{{ order["product_name"] }}</strong>
+                                        <span class="order-state state-{{ order['payment_status'] }}">
+                                            {{ order["payment_status"] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="order-card-grid">
+                                        <div>
+                                            <span>주문번호</span>
+                                            <b>{{ order["order_no"] }}</b>
+                                        </div>
+
+                                        <div>
+                                            <span>결제수단</span>
+                                            <b>
+                                                {{
+                                                    payment_method_labels.get(
+                                                        order["payment_method"],
+                                                        order["payment_method"]
+                                                    )
+                                                }}
+                                            </b>
+                                        </div>
+
+                                        <div>
+                                            <span>결제금액</span>
+                                            <b>{{ "{:,}".format(order["amount"]) }}원</b>
+                                        </div>
+
+                                        <div>
+                                            <span>결제시각</span>
+                                            <b>{{ order["paid_at"] or order["ordered_at"] }}</b>
+                                        </div>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-inline-state">
+                            아직 결제내역이 없습니다.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="history-block">
+                    <div class="history-block-heading">
+                        <h2>보유 이용권</h2>
+                    </div>
+
+                    {% if active_passes %}
+                        <div class="pass-record-grid">
+                            {% for user_pass in active_passes %}
+                                <article class="pass-record-card">
+                                    <div class="pass-record-top">
+                                        <strong>{{ user_pass["product_name"] }}</strong>
+                                        <span class="order-state state-{{ user_pass['status'] }}">
+                                            {{ user_pass["status"] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="pass-record-body">
+                                        <div>
+                                            <span>유효기간</span>
+                                            <b>{{ user_pass["valid_from"] }} ~ {{ user_pass["expires_at"] }}</b>
+                                        </div>
+
+                                        <div>
+                                            <span>기본 이용</span>
+                                            <b>{{ user_pass["pass_minutes"] }}분</b>
+                                        </div>
+
+                                        <div>
+                                            <span>남은 사용</span>
+                                            <b>
+                                                {% if user_pass["is_unlimited"] == 1 %}
+                                                    무제한
+                                                {% elif user_pass["remaining_uses"] is not none %}
+                                                    {{ user_pass["remaining_uses"] }}회
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </b>
+                                        </div>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-inline-state">
+                            현재 보유한 이용권이 없습니다.
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+</section>
+
+{% if tab == "rental" and current_pass and not active_rental %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const video = document.getElementById("qrVideo");
+        const cameraStatus = document.getElementById("cameraStatus");
+        const cameraPlaceholder = document.getElementById("cameraPlaceholder");
+        const startButton = document.getElementById("cameraStartButton");
+        const stopButton = document.getElementById("cameraStopButton");
+        const qrCodeInput = document.getElementById("qrCodeInput");
+        const previewButton = document.getElementById("previewButton");
+
+        let mediaStream = null;
+        let detector = null;
+        let scanning = false;
+
+        async function startCamera() {
+            if (!navigator.mediaDevices) {
+                cameraStatus.textContent = "카메라 미지원";
+                window.showClientNotice(
+                    "현재 브라우저에서는 카메라를 사용할 수 없습니다.",
+                    "warning"
+                );
+                return;
+            }
+
+            if (!("BarcodeDetector" in window)) {
+                cameraStatus.textContent = "QR 인식 미지원";
+                window.showClientNotice(
+                    "현재 브라우저는 QR 자동 인식을 지원하지 않습니다. 직접 입력을 사용해 주세요.",
+                    "warning"
+                );
+                return;
+            }
+
+            try {
+                detector = new BarcodeDetector({
+                    formats: ["qr_code"],
+                });
+
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: {
+                            ideal: "environment",
+                        },
+                    },
+                    audio: false,
+                });
+
+                video.srcObject = mediaStream;
+                cameraPlaceholder.classList.add("camera-placeholder-hide");
+                cameraStatus.textContent = "QR 스캔 중";
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                scanning = true;
+
+                scanFrame();
+            } catch (error) {
+                cameraStatus.textContent = "카메라 실행 실패";
+                window.showClientNotice(
+                    "카메라 권한을 확인해 주세요.",
+                    "danger"
+                );
+            }
+        }
+
+        async function scanFrame() {
+            if (!scanning || !detector) {
+                return;
+            }
+
+            try {
+                const barcodes = await detector.detect(video);
+
+                if (barcodes.length > 0) {
+                    const value = barcodes[0].rawValue.trim();
+
+                    qrCodeInput.value = value;
+                    cameraStatus.textContent = "QR 인식 완료";
+                    stopCamera();
+
+                    window.location.href = (
+                        "/passes?tab=rental&code="
+                        + encodeURIComponent(value)
+                    );
+
+                    return;
+                }
+            } catch (error) {
+                console.log("QR 인식 대기 중", error);
+            }
+
+            window.requestAnimationFrame(scanFrame);
+        }
+
+        function stopCamera() {
+            scanning = false;
+
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+            }
+
+            mediaStream = null;
+            video.srcObject = null;
+            cameraPlaceholder.classList.remove("camera-placeholder-hide");
+            startButton.disabled = false;
+            stopButton.disabled = true;
+
+            if (cameraStatus.textContent !== "QR 인식 완료") {
+                cameraStatus.textContent = "카메라 종료";
+            }
+        }
+
+        startButton.addEventListener("click", startCamera);
+        stopButton.addEventListener("click", stopCamera);
+
+        previewButton.addEventListener("click", function () {
+            const value = qrCodeInput.value.trim();
+
+            if (!value) {
+                window.showClientNotice(
+                    "QR 코드 또는 자전거 번호를 입력해 주세요.",
+                    "warning"
+                );
+                return;
+            }
+
+            window.location.href = (
+                "/passes?tab=rental&code="
+                + encodeURIComponent(value)
+            );
+        });
+
+        window.addEventListener("beforeunload", stopCamera);
+    });
+</script>
+{% endif %}
+{% endblock %}

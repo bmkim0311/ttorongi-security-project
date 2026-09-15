@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}
+    작업 내역 | 또롱이 협력업체 포털
+{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="page-eyebrow">
+            COMPLETED HISTORY
+        </span>
+
+        <h1>작업 내역</h1>
+
+        <p>
+            완료된 업무와 제출한 정비 결과를 확인합니다.
+        </p>
+    </div>
+</section>
+
+<section class="panel filter-panel">
+    <form
+        action="{{ url_for('history') }}"
+        method="get"
+        class="filter-form"
+    >
+        <div class="filter-field filter-field-grow">
+            <label for="keyword">완료 작업 검색</label>
+
+            <input
+                type="search"
+                id="keyword"
+                name="keyword"
+                value="{{ keyword }}"
+                placeholder="작업번호, 작업명, 대여소, 자전거, 처리 내용 검색"
+            >
+        </div>
+
+        <div class="filter-actions">
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                조회
+            </button>
+
+            <a
+                href="{{ url_for('history') }}"
+                class="button button-secondary"
+            >
+                초기화
+            </a>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <span class="panel-eyebrow">
+                REPORT ARCHIVE
+            </span>
+
+            <h2>
+                완료 보고서
+                <span class="title-count">
+                    {{ history_rows|length }}
+                </span>
+            </h2>
+        </div>
+    </div>
+
+    {% if history_rows %}
+        <div class="history-list">
+            {% for row in history_rows %}
+                <a
+                    href="{{ url_for('task_detail', task_id=row.id) }}"
+                    class="history-card"
+                >
+                    <div class="history-card-top">
+                        <div>
+                            <span class="history-code">
+                                {{ row.task_code }}
+                            </span>
+
+                            <h3>{{ row.issue_title }}</h3>
+                        </div>
+
+                        <span class="badge badge-status-{{ row.report_status }}">
+                            {{
+                                {
+                                    "submitted": "검토 대기",
+                                    "reviewed": "검토 완료",
+                                    "rejected": "보완 요청"
+                                }.get(
+                                    row.report_status,
+                                    row.report_status or "미등록"
+                                )
+                            }}
+                        </span>
+                    </div>
+
+                    <div class="history-meta-grid">
+                        <div>
+                            <span>작업 대상</span>
+
+                            <strong>
+                                {{ row.station_name or "미지정" }}
+                                ·
+                                {{ row.bicycle_code or "대여소 작업" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>완료 일시</span>
+
+                            <strong>
+                                {{
+                                    row.completed_at.strftime(
+                                        "%Y.%m.%d %H:%M"
+                                    )
+                                    if row.completed_at
+                                    else "-"
+                                }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>교체 부품</span>
+
+                            <strong>
+                                {{ row.replaced_parts or "없음" }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>최종 상태</span>
+
+                            <strong>
+                                {{
+                                    bicycle_status_labels.get(
+                                        row.bicycle_result_status,
+                                        row.bicycle_result_status or "-"
+                                    )
+                                }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="history-description">
+                        <span>처리 내용</span>
+
+                        <p>
+                            {{
+                                row.work_description
+                                or
+                                "등록된 처리 내용이 없습니다."
+                            }}
+                        </p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">↺</div>
+
+            <h3>완료된 작업이 없습니다.</h3>
+
+            <p>
+                작업을 완료하고 보고서를 제출하면 여기에 표시됩니다.
+            </p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

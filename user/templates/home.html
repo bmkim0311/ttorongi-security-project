@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}
+서비스 홈 | 또롱이
+{% endblock %}
+
+{% block content %}
+<section class="home-page">
+    <div class="home-container">
+        <section
+            class="welcome-section{% if session.get('guest_mode') %} guest-photo-hero{% else %} member-vivid-hero{% endif %}"
+        >
+            <div class="welcome-copy">
+                <span class="eyebrow">
+                    TTORONGI USER SERVICE
+                </span>
+
+                {% if session.get("guest_mode") %}
+                    <h1>
+                        처음 방문하셨나요?<br>
+                        또롱이와 한강을 달려보세요.
+                    </h1>
+
+                    <p>
+                        가까운 대여소를 확인하고,
+                        한강 바람을 느끼며<br>
+                        또롱이 공공자전거를 쉽고 편하게 이용해 보세요.
+                    </p>
+                {% else %}
+                    <div class="member-welcome-badge">
+                        <span></span>
+                        오늘도 이용 준비 완료
+                    </div>
+
+                    <h1>
+                        {{ g.user["name"] if g.user and g.user["name"] else g.user["username"] }}님,<br>
+                        오늘은 어디로 달려볼까요?
+                    </h1>
+
+                    <p>
+                        대여소 조회부터 이용권 구매,
+                        QR 자전거 대여까지 한 번에 이용할 수 있습니다.
+                    </p>
+
+                    {% if current_pass %}
+                        <div class="member-pass-inline">
+                            <span>현재 이용권</span>
+                            <strong>{{ current_pass["product_name"] }}</strong>
+                            <small>
+                                기본 {{ current_pass["pass_minutes"] }}분 ·
+                                만료 {{ current_pass["expires_at"] }}
+                            </small>
+                        </div>
+                    {% else %}
+                        <div class="member-pass-inline is-empty">
+                            <span>현재 이용권</span>
+                            <strong>사용 가능한 이용권 없음</strong>
+                            <small>
+                                먼저 이용권을 구매한 뒤 QR 대여를 시작해 주세요.
+                            </small>
+                        </div>
+                    {% endif %}
+
+                    <div class="member-hero-actions">
+                        <a
+                            href="{{ url_for('stations') }}"
+                            class="member-primary-action"
+                        >
+                            가까운 대여소 보기
+                            <span>→</span>
+                        </a>
+
+                        <a
+                            href="{{ url_for('pass_center', tab='purchase') }}"
+                            class="member-secondary-action"
+                        >
+                            이용권 구매하기
+                        </a>
+                    </div>
+
+                    <div class="member-service-pills">
+                        <span>
+                            <b>●</b>
+                            실시간 대여소
+                        </span>
+
+                        <span>
+                            <b>QR</b>
+                            QR 결제 가능
+                        </span>
+
+                        <span>
+                            <b>{{ active_pass_count }}</b>
+                            사용 가능 이용권
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if not session.get("guest_mode") %}
+                <div class="member-bike-scene" aria-hidden="true">
+                    <div class="member-sun"></div>
+                    <div class="member-cloud member-cloud-one"></div>
+                    <div class="member-cloud member-cloud-two"></div>
+
+                    <div class="member-bike-card">
+                        <span class="member-bike-icon">
+                            🚲
+                        </span>
+
+                        <strong>
+                            READY TO RIDE
+                        </strong>
+
+                        <small>
+                            이용권 구매 후 QR로 간편하게 출발하세요
+                        </small>
+                    </div>
+
+                    <div class="member-road-line"></div>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="quick-grid">
+            <article class="quick-card primary-card">
+                <div class="card-icon">
+                    📍
+                </div>
+
+                <span>STATION</span>
+                <h2>대여소 조회</h2>
+
+                <p>
+                    가까운 대여소와 대여 가능한
+                    자전거 수량을 확인합니다.
+                </p>
+
+                <a href="{{ url_for('stations') }}">
+                    대여소 확인하기 →
+                </a>
+            </article>
+
+            <article class="quick-card">
+                <div class="card-icon">
+                    🎫
+                </div>
+
+                <span>PASS & PAYMENT</span>
+                <h2>이용권 구매</h2>
+
+                <p>
+                    일일권·정기권을 구매하고
+                    QR 결제까지 진행할 수 있습니다.
+                </p>
+
+                <a href="{{ url_for('pass_center', tab='purchase') }}">
+                    이용권 구매하기 →
+                </a>
+            </article>
+
+            {% if not session.get("guest_mode") %}
+                <article class="quick-card">
+                    <div class="card-icon">
+                        ◷
+                    </div>
+
+                    <span>HISTORY</span>
+                    <h2>이용내역 확인</h2>
+
+                    <p>
+                        대여 및 반납 정보,
+                        이용권·결제내역을 확인합니다.
+                    </p>
+
+                    <a href="{{ url_for('history') }}">
+                        이용내역 확인하기 →
+                    </a>
+                </article>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

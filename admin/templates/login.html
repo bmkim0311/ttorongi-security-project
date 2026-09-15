@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}
+    관리자 로그인 | 또롱이
+{% endblock %}
+
+{% block guest_content %}
+<div class="login-page">
+    <section class="login-visual">
+        <div class="login-brand">
+            <span class="brand-mark">T</span>
+
+            <span class="brand-copy">
+                <strong>TTORONGI</strong>
+                <small>CONTROL CENTER</small>
+            </span>
+        </div>
+
+        <div class="login-visual-copy">
+            <span class="page-eyebrow">
+                INTEGRATED OPERATIONS
+            </span>
+
+            <h1>
+                도시의 이동을<br>
+                하나의 화면에서 운영합니다.
+            </h1>
+
+            <p>
+                회원, 대여소, 자전거, 대여 현황과 협력업체의
+                정비 작업을 통합 관리하는 운영기관 전용 시스템입니다.
+            </p>
+        </div>
+
+        <div class="login-visual-footer">
+            <span>SECURE ADMIN ACCESS</span>
+            <span>PORT 6000</span>
+        </div>
+    </section>
+
+    <section class="login-form-side">
+        <div class="login-form-card">
+            <span class="page-eyebrow">
+                ADMINISTRATOR
+            </span>
+
+            <h2>관리자 로그인</h2>
+
+            <p class="login-guide">
+                등록된 관리자 계정으로 로그인해 주세요.
+            </p>
+
+            <form
+                action="{{ url_for('login') }}"
+                method="post"
+                class="login-form"
+            >
+                <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <label>
+                    관리자 아이디
+
+                    <input
+                        type="text"
+                        name="username"
+                        value="{{ username or '' }}"
+                        placeholder="관리자 아이디 입력"
+                        autocomplete="username"
+                        required
+                        autofocus
+                    >
+                </label>
+
+                <label>
+                    비밀번호
+
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="비밀번호 입력"
+                        autocomplete="current-password"
+                        required
+                    >
+                </label>
+
+                <button
+                    type="submit"
+                    class="primary-button login-button"
+                >
+                    관리자 시스템 접속
+                </button>
+            </form>
+
+            <div class="security-notice">
+                <strong>보안 안내</strong>
+
+                <p>
+                    관리자 로그인 및 주요 운영 행위는
+                    보안 감사 로그로 기록됩니다.
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

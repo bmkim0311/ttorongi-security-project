@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ notice.title }} | 공지사항
+{% endblock %}
+
+{% block content %}
+<main class="tt-notice-detail-page">
+    <section class="tt-notice-page-title">
+        <span class="tt-notice-page-kicker">
+            고객 안내
+        </span>
+
+        <h1>공지사항</h1>
+
+        <p>
+            또롱이 공공자전거 서비스의 주요 운영 안내와
+            안전 정보를 확인해 주세요.
+        </p>
+    </section>
+
+    <article class="tt-notice-document">
+        <div class="tt-notice-document-head">
+            <div class="tt-notice-document-badges">
+                {% if notice.is_important %}
+                    <span class="tt-notice-badge tt-notice-badge-important">
+                        중요
+                    </span>
+                {% endif %}
+
+                <span class="tt-notice-badge tt-notice-badge-category">
+                    {{
+                        category_labels.get(
+                            notice.category,
+                            "일반"
+                        )
+                    }}
+                </span>
+            </div>
+
+            <h2>{{ notice.title }}</h2>
+
+            <div class="tt-notice-document-meta">
+                <div>
+                    <span>등록일</span>
+
+                    <strong>
+                        {{
+                            notice.published_at
+                            .strftime("%Y.%m.%d")
+                        }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>작성기관</span>
+
+                    <strong>
+                        또롱이 공공자전거 통합운영기관
+                    </strong>
+                </div>
+
+                <div>
+                    <span>조회수</span>
+
+                    <strong>
+                        {{ notice.view_count }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="tt-notice-document-body">
+            {% for paragraph in notice.content.split('\n') %}
+                {% if paragraph | trim %}
+                    <p>
+                        {{ paragraph | trim }}
+                    </p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </article>
+
+    <nav
+        class="tt-notice-document-navigation"
+        aria-label="이전 및 다음 공지"
+    >
+        <div>
+            <span>이전 글</span>
+
+            {% if previous_notice %}
+                <a
+                    href="{{ url_for(
+                        'notice_detail',
+                        notice_id=previous_notice.id
+                    ) }}"
+                >
+                    {{ previous_notice.title }}
+                </a>
+            {% else %}
+                <em>이전 공지가 없습니다.</em>
+            {% endif %}
+        </div>
+
+        <div>
+            <span>다음 글</span>
+
+            {% if next_notice %}
+                <a
+                    href="{{ url_for(
+                        'notice_detail',
+                        notice_id=next_notice.id
+                    ) }}"
+                >
+                    {{ next_notice.title }}
+                </a>
+            {% else %}
+                <em>다음 공지가 없습니다.</em>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="tt-notice-document-actions">
+        <a href="{{ url_for('notices') }}">
+            목록으로
+        </a>
+    </div>
+</main>
+{% endblock %}
